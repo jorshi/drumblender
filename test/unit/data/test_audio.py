@@ -1,5 +1,5 @@
 """
-Tests for the `kick2kick.data.audio` module.
+Tests for the `percussionsynth.data.audio` module.
 """
 from pathlib import Path
 
@@ -9,7 +9,7 @@ import torch
 from percussionsynth.data import AudioDataset
 from percussionsynth.data import AudioPairWithFeatureDataset
 
-TESTED_MODULE = "kick2kick.data.audio"
+TESTED_MODULE = "percussionsynth.data.audio"
 TEST_DATA_DIR = "test_data"
 TEST_META_FILE = "metadata.json"
 TEST_SAMPLE_RATE = 44100

@@ -193,7 +193,7 @@ def test_cut_start_silence_raises_error_for_incorrect_tensor_shape():
 
 
 def test_cut_start_silence_clips_tensor(mocker):
-    mock = mocker.patch("kick2kick.utils.audio.first_non_silent_sample")
+    mock = mocker.patch("percussionsynth.utils.audio.first_non_silent_sample")
     mock.side_effect = [200, 100]
 
     waveform = torch.zeros(2, 1000)
@@ -203,7 +203,9 @@ def test_cut_start_silence_clips_tensor(mocker):
 
 
 def test_cut_start_silence_raises_error_for_silent_input(mocker):
-    _ = mocker.patch("kick2kick.utils.audio.first_non_silent_sample", return_value=None)
+    _ = mocker.patch(
+        "percussionsynth.utils.audio.first_non_silent_sample", return_value=None
+    )
 
     waveform = torch.zeros(1, 1000)
     with pytest.raises(ValueError):
