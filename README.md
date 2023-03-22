@@ -1,4 +1,4 @@
-# 2 KICK 2 FURIOUS
+# Percussion Synth
 
 ## Install
 
@@ -13,13 +13,13 @@ $ pip install -e ".[dev]"
 Code in this repo is accessed through the PyTorch Lightning CLI, which is available through the `k2k` console script. To see help:
 
 ```bash
-$ k2k --help
+$ percsynth --help
 ```
 
 To run an experiment, pass the appropriate config file to the `fit` subcommand:
 
 ```bash
-$ k2k fit -c cfg/regression.yaml
+$ percsynth fit -c cfg/regression.yaml
 ```
 
 And so on.
@@ -28,7 +28,7 @@ And so on.
 To download the unprocessed Kick Drum dataset:
 
 ```bash
-$ k2k-dataset --unprocessed
+$ percsynth-dataset --unprocessed
 ```
 
 Requires correct authentication credentials for Cloudflare R2. See [cloudflare](https://developers.cloudflare.com/r2/data-access/s3-api/tokens/) for information on generating API tokens.
