@@ -9,11 +9,11 @@ import pytest
 import torch
 from torch.utils.data import DataLoader
 
-import kick2kick.utils.data as data_utils
-from kick2kick.data import KickDataModule
-from kick2kick.data import KickModalDataModule
-from kick2kick.data import KickModalEmbeddingDataModule
-from kick2kick.utils.modal_analysis import CQTModalAnalysis
+import percussionsynth.utils.data as data_utils
+from percussionsynth.data import KickDataModule
+from percussionsynth.data import KickModalDataModule
+from percussionsynth.data import KickModalEmbeddingDataModule
+from percussionsynth.utils.modal_analysis import CQTModalAnalysis
 
 # from kick2kick.data import KickDataset
 

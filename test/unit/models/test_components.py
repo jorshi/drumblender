@@ -1,8 +1,8 @@
 import torch
 
-from kick2kick.models.components import FiLM
-from kick2kick.models.components import GatedActivation
-from kick2kick.models.components import TFiLM
+from percussionsynth.models.components import FiLM
+from percussionsynth.models.components import GatedActivation
+from percussionsynth.models.components import TFiLM
 
 
 def test_film_correctly_forwards_input():

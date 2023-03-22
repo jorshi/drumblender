@@ -5,7 +5,7 @@ import jsonargparse
 import pytest
 import torch
 
-import kick2kick.loss as loss
+import percussionsynth.loss as loss
 
 
 def test_first_order_difference_loss():

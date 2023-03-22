@@ -9,9 +9,9 @@ from dotenv import load_dotenv
 from jsonargparse import ArgumentParser
 from pytorch_lightning.cli import LightningCLI
 
-import kick2kick.utils.data as data_utils
-from kick2kick.callbacks import SaveConfigCallbackWanb
-from kick2kick.data import KickDataModule
+import percussionsynth.utils.data as data_utils
+from percussionsynth.callbacks import SaveConfigCallbackWanb
+from percussionsynth.data import KickDataModule
 
 
 def run_cli():

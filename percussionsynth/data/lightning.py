@@ -18,13 +18,13 @@ from torch.utils.data import DataLoader
 from torchaudio.datasets.utils import extract_archive
 from tqdm import tqdm
 
-import kick2kick.utils.audio as audio_utils
-import kick2kick.utils.data as data_utils
-from kick2kick.data.audio import AudioDataset
-from kick2kick.data.audio import AudioPairDataset
-from kick2kick.data.audio import AudioPairWithFeatureDataset
-from kick2kick.data.synthetic import MultiplicationDataset
-from kick2kick.utils.modal_analysis import CQTModalAnalysis
+import percussionsynth.utils.audio as audio_utils
+import percussionsynth.utils.data as data_utils
+from percussionsynth.data.audio import AudioDataset
+from percussionsynth.data.audio import AudioPairDataset
+from percussionsynth.data.audio import AudioPairWithFeatureDataset
+from percussionsynth.data.synthetic import MultiplicationDataset
+from percussionsynth.utils.modal_analysis import CQTModalAnalysis
 
 
 # Setup logging

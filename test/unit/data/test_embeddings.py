@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 import torch
 
-from kick2kick.data.embeddings import OpenL3
+from percussionsynth.data.embeddings import OpenL3
 
 
 def test_openl3_is_none_raises_import_error_on_call(mocker):

@@ -3,7 +3,7 @@ Unit tests for the synthetic data module.
 """
 import pytest
 
-from kick2kick.data import MultiplicationDataset
+from percussionsynth.data import MultiplicationDataset
 
 
 @pytest.fixture

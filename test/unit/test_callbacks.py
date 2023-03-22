@@ -4,9 +4,9 @@ from typing import Any
 import pytorch_lightning as pl
 import torch
 
-from kick2kick.callbacks import CleanWandbCacheCallback
-from kick2kick.callbacks import LogAudioCallback
-from kick2kick.callbacks import SaveConfigCallbackWanb
+from percussionsynth.callbacks import CleanWandbCacheCallback
+from percussionsynth.callbacks import LogAudioCallback
+from percussionsynth.callbacks import SaveConfigCallbackWanb
 
 
 class FakeLogger:

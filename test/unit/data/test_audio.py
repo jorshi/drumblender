@@ -6,8 +6,8 @@ from pathlib import Path
 import pytest
 import torch
 
-from kick2kick.data import AudioDataset
-from kick2kick.data import AudioPairWithFeatureDataset
+from percussionsynth.data import AudioDataset
+from percussionsynth.data import AudioPairWithFeatureDataset
 
 TESTED_MODULE = "kick2kick.data.audio"
 TEST_DATA_DIR = "test_data"

@@ -3,7 +3,7 @@ import pytest
 import torch
 import torchaudio
 
-import kick2kick.utils.audio as audio_utils
+import percussionsynth.utils.audio as audio_utils
 
 
 def preprocess_audio_file(

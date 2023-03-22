@@ -1,7 +1,7 @@
 import pytest
 import torch
 
-from kick2kick.models import MLP
+from percussionsynth.models import MLP
 
 
 @pytest.fixture

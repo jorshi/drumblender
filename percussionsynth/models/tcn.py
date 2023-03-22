@@ -4,10 +4,10 @@ from typing import Optional
 import torch
 from torch import nn
 
-from kick2kick.models.components import FiLM
-from kick2kick.models.components import GatedActivation
-from kick2kick.models.components import Pad
-from kick2kick.models.components import TFiLM
+from percussionsynth.models.components import FiLM
+from percussionsynth.models.components import GatedActivation
+from percussionsynth.models.components import Pad
+from percussionsynth.models.components import TFiLM
 
 __all__ = ["TCN"]
 

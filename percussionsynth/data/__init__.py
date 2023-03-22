@@ -1,12 +1,12 @@
-from kick2kick.data.audio import AudioDataset
-from kick2kick.data.audio import AudioPairDataset
-from kick2kick.data.audio import AudioPairKroneckerDeltaDataset
-from kick2kick.data.audio import AudioPairWithFeatureDataset
-from kick2kick.data.lightning import KickDataModule
-from kick2kick.data.lightning import KickModalDataModule
-from kick2kick.data.lightning import KickModalEmbeddingDataModule
-from kick2kick.data.lightning import MultiplicationDataModule
-from kick2kick.data.synthetic import MultiplicationDataset
+from percussionsynth.data.audio import AudioDataset
+from percussionsynth.data.audio import AudioPairDataset
+from percussionsynth.data.audio import AudioPairKroneckerDeltaDataset
+from percussionsynth.data.audio import AudioPairWithFeatureDataset
+from percussionsynth.data.lightning import KickDataModule
+from percussionsynth.data.lightning import KickModalDataModule
+from percussionsynth.data.lightning import KickModalEmbeddingDataModule
+from percussionsynth.data.lightning import MultiplicationDataModule
+from percussionsynth.data.synthetic import MultiplicationDataset
 
 __all__ = [
     "MultiplicationDataModule",
