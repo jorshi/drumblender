@@ -1,0 +1,52 @@
+class_path: kick2kick.models.KickTCN
+init_args:
+  transient:
+    class_path: kick2kick.models.TCN
+    init_args:
+      in_channels: 1
+      hidden_channels: 16
+      out_channels: 8
+      dilation_base: 2
+      num_layers: 8
+      kernel_size: 13
+      causal: true
+      norm: null
+      activation: Tanh
+      film_conditioning: true
+      film_embedding_size: 64
+      use_temporal_film: false
+      temporal_film_block_size: null
+  sustain:
+    class_path: kick2kick.models.TCN
+    init_args:
+      in_channels: 1
+      hidden_channels: 16
+      out_channels: 8
+      dilation_base: 8
+      num_layers: 5
+      kernel_size: 13
+      causal: true
+      norm: instance
+      activation: ELU
+      film_conditioning: true
+      film_embedding_size: 64
+      use_temporal_film: false
+      temporal_film_block_size: null
+  fusion:
+    class_path: kick2kick.models.TCN
+    init_args:
+      in_channels: 16
+      hidden_channels: 16
+      out_channels: 1
+      dilation_base: 8
+      num_layers: 5
+      kernel_size: 13
+      causal: true
+      norm: instance
+      activation: ELU
+      film_conditioning: true
+      film_embedding_size: 64
+      use_temporal_film: true
+      temporal_film_block_size: 64
+  noise_scale: 2.0
+  transient_length: 9600

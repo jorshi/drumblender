@@ -1,0 +1,3 @@
+class_path: kick2kick.loss.FirstOrderDifferenceLoss
+init_args:
+  reduction: mean

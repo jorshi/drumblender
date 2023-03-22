@@ -1,0 +1,3 @@
+class_path: torch.nn.MSELoss
+init_args:
+  reduction: mean

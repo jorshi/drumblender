@@ -1,0 +1,5 @@
+class_path: kick2kick.models.EAT
+init_args:
+  input_length: 96000
+  embed_dim: 128
+  n_classes: 64

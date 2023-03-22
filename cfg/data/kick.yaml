@@ -1,0 +1,15 @@
+class_path: kick2kick.data.KickDataModule
+init_args:
+  batch_size: 16
+  num_workers: 0
+  dataset_class: kick2kick.data.AudioDataset
+  url: https://d5d740b2d880827ae0c8f465bf180715.r2.cloudflarestorage.com
+  archive: k2k-dataset-audio-only-v0.tar.gz
+  bucket: drum-dataset
+  data_dir: dataset/audio-only
+  data_dir_unprocessed: dataset-unprocessed/audio-only
+  meta_file: kick-drums.json
+  sample_rate: 48000
+  num_samples: 96000
+  dataset_kwargs:
+    seed: 42

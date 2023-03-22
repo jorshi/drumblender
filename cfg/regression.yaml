@@ -1,0 +1,19 @@
+# Example config file for a simple regression task
+#
+# Note that we can use the `class_name` parameter to cause LightningCLI to instantiate
+# a class from a string. The `init_args` parameter is used to pass arguments to the
+# constructor of the class.
+#
+# We can also group related configurations in sub-config files and include them simply
+# by passing their path, as illustrated below.
+
+model:
+  class_path: kick2kick.tasks.Regression
+  init_args:
+    model: models/mlp.yaml
+    loss_fn: loss/mse.yaml
+optimizer: optimizer/adam.yaml
+data: data/multiplication.yaml
+
+trainer:
+  logger: logger/wandb.yaml
