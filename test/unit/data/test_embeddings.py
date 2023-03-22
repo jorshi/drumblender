@@ -6,21 +6,21 @@ from percussionsynth.data.embeddings import OpenL3
 
 
 def test_openl3_is_none_raises_import_error_on_call(mocker):
-    mocker.patch("kick2kick.data.embeddings.openl3", None)
+    mocker.patch("percussionsynth.data.embeddings.openl3", None)
     emb = OpenL3(sample_rate=44100)
     with pytest.raises(ImportError):
         emb(torch.rand(1, 100))
 
 
 def test_openl3_asserts_on_incorrect_input_shape(mocker):
-    mocker.patch("kick2kick.data.embeddings.openl3")
+    mocker.patch("percussionsynth.data.embeddings.openl3")
     emb = OpenL3(sample_rate=44100)
     with pytest.raises(AssertionError):
         emb(torch.rand(2, 100))
 
 
 def test_openl3_is_called_with_correct_arguments(mocker):
-    mock = mocker.patch("kick2kick.data.embeddings.openl3")
+    mock = mocker.patch("percussionsynth.data.embeddings.openl3")
     mock.get_audio_embedding.return_value = np.zeros((1, 6144)), None
     emb = OpenL3(
         sample_rate=48000,
@@ -49,7 +49,7 @@ def test_openl3_is_called_with_correct_arguments(mocker):
 
 
 def test_openl3_summarize_with_mean(mocker):
-    mock = mocker.patch("kick2kick.data.embeddings.openl3")
+    mock = mocker.patch("percussionsynth.data.embeddings.openl3")
     mock.get_audio_embedding.return_value = np.ones((10, 6144)), None
 
     emb = OpenL3(sample_rate=44100, summarize="mean")
@@ -61,7 +61,7 @@ def test_openl3_summarize_with_mean(mocker):
 
 
 def test_openl3_summarize_with_flatten(mocker):
-    mock = mocker.patch("kick2kick.data.embeddings.openl3")
+    mock = mocker.patch("percussionsynth.data.embeddings.openl3")
     mock.get_audio_embedding.return_value = np.ones((10, 512)), None
 
     emb = OpenL3(sample_rate=44100, summarize="flatten")
@@ -73,7 +73,7 @@ def test_openl3_summarize_with_flatten(mocker):
 
 
 def test_openl3_summarize_with_callable(mocker):
-    mock = mocker.patch("kick2kick.data.embeddings.openl3")
+    mock = mocker.patch("percussionsynth.data.embeddings.openl3")
     mock.get_audio_embedding.return_value = np.ones((3, 512)), None
 
     def summarize(x):

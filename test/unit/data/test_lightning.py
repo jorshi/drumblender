@@ -15,9 +15,9 @@ from percussionsynth.data import KickModalDataModule
 from percussionsynth.data import KickModalEmbeddingDataModule
 from percussionsynth.utils.modal_analysis import CQTModalAnalysis
 
-# from kick2kick.data import KickDataset
+# from percussionsynth.data import KickDataset
 
-TESTED_MODULE = "kick2kick.data.lightning"
+TESTED_MODULE = "percussionsynth.data.lightning"
 
 
 @pytest.fixture
@@ -262,7 +262,7 @@ def kick_datamodule(fs, mocker):
     data = KickDataModule()
     fs.create_dir(data.data_dir)
     fs.create_file(Path(data.data_dir).joinpath(data.meta_file))
-    mocker.patch("kick2kick.data.audio.json.load", side_effect=processed_metadata)
+    mocker.patch("percussionsynth.data.audio.json.load", side_effect=processed_metadata)
     return KickDataModule()
 
 
@@ -562,7 +562,9 @@ def kick_modal_datamodule(fs, mocker):
     data = KickModalDataModule()
     fs.create_dir(data.data_dir)
     fs.create_file(Path(data.data_dir).joinpath(data.meta_file))
-    mocker.patch("kick2kick.data.audio.json.load", side_effect=processed_modal_metadata)
+    mocker.patch(
+        "percussionsynth.data.audio.json.load", side_effect=processed_modal_metadata
+    )
     return KickModalDataModule()
 
 
@@ -617,10 +619,10 @@ def test_kick_modal_data_module_train_data(kick_modal_datamodule, mocker):
 
 def test_kick_modal_embedding_data_module_preprocess(mocker):
     mock_parent_preprocess = mocker.patch(
-        "kick2kick.data.KickModalDataModule.preprocess_dataset"
+        "percussionsynth.data.KickModalDataModule.preprocess_dataset"
     )
     mock_preprocess_features = mocker.patch(
-        "kick2kick.data.KickModalEmbeddingDataModule.preprocess_features"
+        "percussionsynth.data.KickModalEmbeddingDataModule.preprocess_features"
     )
 
     def fake_embedding_model(x):

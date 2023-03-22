@@ -56,9 +56,9 @@ def test_callback_correctly_interleaves_audio(monkeypatch, mocker):
     trainer = None
     callback.setup(trainer, model, "fit")
 
-    # patch wandb.Audio inside the kick2kick.callbacks module
+    # patch wandb.Audio inside the percussionsynth.callbacks module
     FAKE_RETURN = "fake return"
-    audio_patch = mocker.patch("kick2kick.callbacks.Audio")
+    audio_patch = mocker.patch("percussionsynth.callbacks.Audio")
     audio_patch.return_value = FAKE_RETURN
 
     # If inputs are correctly interleaved, this is the sequence we should receive.
@@ -135,10 +135,11 @@ def test_save_config_callback_renames_correctly(mocker, fs):
     # Patch the parent class -- we just want to test that the setup method is
     # called which expected to create a config file in trainer.log_dir
     mock_init = mocker.patch(
-        "kick2kick.callbacks.SaveConfigCallback.__init__", return_value=None
+        "percussionsynth.callbacks.SaveConfigCallback.__init__", return_value=None
     )
     mock_setup = mocker.patch(
-        "kick2kick.callbacks.SaveConfigCallback.setup", side_effect=create_config_file
+        "percussionsynth.callbacks.SaveConfigCallback.setup",
+        side_effect=create_config_file,
     )
 
     class FakeTrainer:
@@ -169,10 +170,11 @@ def test_save_config_callback_just_calls_setup_for_non_wandb_logger(mocker, fs):
     # Patch the parent class -- we just want to test that the setup method is
     # called which expected to create a config file in trainer.log_dir
     mock_init = mocker.patch(
-        "kick2kick.callbacks.SaveConfigCallback.__init__", return_value=None
+        "percussionsynth.callbacks.SaveConfigCallback.__init__", return_value=None
     )
     mock_setup = mocker.patch(
-        "kick2kick.callbacks.SaveConfigCallback.setup", side_effect=create_config_file
+        "percussionsynth.callbacks.SaveConfigCallback.setup",
+        side_effect=create_config_file,
     )
 
     class FakeTrainer:

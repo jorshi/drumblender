@@ -1,5 +1,5 @@
 """
-Tests for the `kick2kick.loss` module.
+Tests for the `percussionsynth.loss` module.
 """
 import jsonargparse
 import pytest
@@ -49,7 +49,7 @@ def test_weighted_loss_with_jsonargparse_config(monkeypatch):
 
     config = (
         "loss:\n"
-        "  class_path: kick2kick.loss.WeightedLoss\n"
+        "  class_path: percussionsynth.loss.WeightedLoss\n"
         "  init_args:\n"
         "    loss_fns: \n"
         "    - class_path: torch.nn.L1Loss\n"
