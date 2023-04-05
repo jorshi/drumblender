@@ -14,7 +14,7 @@ class ModalSynthFreqs(nn.Module):
         window_size: int = 1024,  # Window size OLA amplitude envelope
     ):
         """Overlap-add modal synthesis with given frequencies and amplitudes"""
-
+        super().__init__()
         # Amplitude envelope as complex OLA
         self.window_size = window_size
         self.hop_size = self.window_size // 2
@@ -50,16 +50,24 @@ class ModalSynthFreqs(nn.Module):
         # Stitch the windows back together
         amp = torch.nn.functional.fold(
             amp_unfold,
-            output_size=(1, self.n),
+            output_size=(1, n),
             kernel_size=(1, self.window_size),
             padding=(0, self.padding),
             stride=self.hop_size
         )
 
-        amp = rearrange(amp, "(b m) 1 1 n -> b m n", m=self.num_modes)
+        amp = rearrange(amp, "(b m) 1 1 n -> b m n", m=num_modes)
         return amp
 
-    def get_f0(self,freqs):
+    """
+        Interpolates the predicted frequency envelope
+    """
+    def get_f0(self,freq_env):
+        
+        batch_size,num_modes,num_frames = freq_env.size()
+        n = (num_frames-1)*self.hop_size
+
+        freqs = F.interpolate(freq_env, size=n, mode="linear")
         freqs = rearrange(freqs, "b m n -> (b m) n")
         return freqs
 
@@ -72,13 +80,13 @@ class ModalSynthFreqs(nn.Module):
                     freq_env = 2 * np.pi * freqs / sr
                 2. Overall amp is not processed here. It should be implemented before on the mode decoder.
     """
-    def forward(self, x : Tuple[torch.Tensor,torch.Tensor,...]):
+    def forward(self, x : Tuple[torch.Tensor,...]):
 
         if len(x) == 2:
             amp_env, freq_env = x
-            phase = torch.zeros(amps.size()[0],amps.size()[1])
+            phase = torch.zeros(amp_env.size()[0],amp_env.size()[1])
         elif len(x) == 3:
-            amps, freqs, phase = x
+            amp_env, freq_env, phase = x
 
         # Rearrange the time-varying frequency for each mode
         f0_env =  self.get_f0(freq_env)
@@ -86,11 +94,10 @@ class ModalSynthFreqs(nn.Module):
         # Enforce non-aliasing frequencies
         f0_env = torch.clamp(f0_env, 0, torch.pi)
 
-        # For optimizer: Normalize between 0 to pi.
+        # For optimizer: Normalize between 0 to pi. 
         phase = torch.sigmoid(phase) * torch.pi 
         phase = rearrange(phase, "b m -> (b m) 1")
         phase_env = torch.cumsum(f0_env, dim=1) + phase      
-
         y = torch.cos(phase_env)
 
         # Apply amplitude envelope
@@ -98,7 +105,8 @@ class ModalSynthFreqs(nn.Module):
         y = y * rearrange(amp_env, "b m n -> (b m) n")
 
         # Sum the modes
-        y = rearrange(y, "(b m) n -> b m n", m=self.num_modes)
+        num_modes = amp_env.size()[1]
+        y = rearrange(y, "(b m) n -> b m n", m=num_modes)
         y = torch.sum(y, dim=1)
 
         # Enforce [-1, 1] -- also adds some nice squash

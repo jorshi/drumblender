@@ -14,7 +14,7 @@ def noise_gen():
 def test_noise_generator_produces_correct_output_size(noise_gen):
     hop_size = 256
     batch_size = 16
-    frame_length = 500
+    frame_length = 512
     num_filters = 120
 
     x = torch.rand(batch_size, frame_length, num_filters)
