@@ -53,7 +53,7 @@ def test_modal_synth_produces_test_tone(modal_synth):
     amp_env[:, 0, :] = 1
     freq_env = torch.ones(batch_size, num_modes, frame_length) * freq_tone
     freq_env = 2 * torch.pi * freq_env / sr
-    # A zero phase input that goes over sigmoid adds 0.5 * pi
+    # Add an initial phase of zero.
     phase = torch.zeros(batch_size, num_modes)
 
     y = modal_synth((amp_env, freq_env, phase))
@@ -61,6 +61,6 @@ def test_modal_synth_produces_test_tone(modal_synth):
     # Manually synthesize a test tone
     t = torch.ones(batch_size, n) / sr
     t = torch.cumsum(t, dim=1)
-    y_ref = torch.cos(2 * torch.pi * freq_tone * t + torch.pi / 2)
+    y_ref = torch.cos(2 * torch.pi * freq_tone * t)
 
     assert torch.allclose(y, y_ref, atol=1e-2, rtol=1e-4)

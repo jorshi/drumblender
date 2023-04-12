@@ -92,7 +92,7 @@ class ModalSynthFreqs(nn.Module):
         f0_env = torch.clamp(f0_env, 0, torch.pi)
 
         # For optimizer: Normalize between 0 to pi.
-        phase = torch.sigmoid(phase) * torch.pi
+        phase = phase % (2 * torch.pi)
         phase = rearrange(phase, "b m -> (b m) 1")
         phase_env = torch.cumsum(f0_env, dim=1) + phase
         y = torch.cos(phase_env)
