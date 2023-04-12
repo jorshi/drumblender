@@ -4,9 +4,9 @@ from typing import Any
 import pytorch_lightning as pl
 import torch
 
-from percussionsynth.callbacks import CleanWandbCacheCallback
-from percussionsynth.callbacks import LogAudioCallback
-from percussionsynth.callbacks import SaveConfigCallbackWanb
+from drumblender.callbacks import CleanWandbCacheCallback
+from drumblender.callbacks import LogAudioCallback
+from drumblender.callbacks import SaveConfigCallbackWanb
 
 
 class FakeLogger:
@@ -56,9 +56,9 @@ def test_callback_correctly_interleaves_audio(monkeypatch, mocker):
     trainer = None
     callback.setup(trainer, model, "fit")
 
-    # patch wandb.Audio inside the percussionsynth.callbacks module
+    # patch wandb.Audio inside the drumblender.callbacks module
     FAKE_RETURN = "fake return"
-    audio_patch = mocker.patch("percussionsynth.callbacks.Audio")
+    audio_patch = mocker.patch("drumblender.callbacks.Audio")
     audio_patch.return_value = FAKE_RETURN
 
     # If inputs are correctly interleaved, this is the sequence we should receive.
@@ -135,10 +135,10 @@ def test_save_config_callback_renames_correctly(mocker, fs):
     # Patch the parent class -- we just want to test that the setup method is
     # called which expected to create a config file in trainer.log_dir
     mock_init = mocker.patch(
-        "percussionsynth.callbacks.SaveConfigCallback.__init__", return_value=None
+        "drumblender.callbacks.SaveConfigCallback.__init__", return_value=None
     )
     mock_setup = mocker.patch(
-        "percussionsynth.callbacks.SaveConfigCallback.setup",
+        "drumblender.callbacks.SaveConfigCallback.setup",
         side_effect=create_config_file,
     )
 
@@ -170,10 +170,10 @@ def test_save_config_callback_just_calls_setup_for_non_wandb_logger(mocker, fs):
     # Patch the parent class -- we just want to test that the setup method is
     # called which expected to create a config file in trainer.log_dir
     mock_init = mocker.patch(
-        "percussionsynth.callbacks.SaveConfigCallback.__init__", return_value=None
+        "drumblender.callbacks.SaveConfigCallback.__init__", return_value=None
     )
     mock_setup = mocker.patch(
-        "percussionsynth.callbacks.SaveConfigCallback.setup",
+        "drumblender.callbacks.SaveConfigCallback.setup",
         side_effect=create_config_file,
     )
 

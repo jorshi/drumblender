@@ -1,8 +1,8 @@
 import torch
 
-from percussionsynth.models.components import FiLM
-from percussionsynth.models.components import GatedActivation
-from percussionsynth.models.components import TFiLM
+from drumblender.models.components import FiLM
+from drumblender.models.components import GatedActivation
+from drumblender.models.components import TFiLM
 
 
 def test_film_correctly_forwards_input():

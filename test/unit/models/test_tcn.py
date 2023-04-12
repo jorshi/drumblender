@@ -1,9 +1,9 @@
 import pytest
 import torch
 
-from percussionsynth.models import KickTCN
-from percussionsynth.models import TCN
-from percussionsynth.models.components import Pad
+from drumblender.models import KickTCN
+from drumblender.models import TCN
+from drumblender.models.components import Pad
 
 
 def test_pad_correctly_applies_causal_padding():
@@ -136,9 +136,9 @@ def test_tcn_allows_film_conditioning():
 
 def test_tcn_uses_gated_activation(mocker):
     # TODO: switch to dependency injection of activations to avoid monkeypatching?
-    import percussionsynth.models.tcn
+    import drumblender.models.tcn
 
-    spy = mocker.spy(percussionsynth.models.tcn.GatedActivation, "__call__")
+    spy = mocker.spy(drumblender.models.tcn.GatedActivation, "__call__")
 
     batch_size = 13
     in_channels = 17
@@ -169,9 +169,9 @@ def test_tcn_uses_gated_activation(mocker):
     "norm,cls_string", [("batch", "BatchNorm1d"), ("instance", "InstanceNorm1d")]
 )
 def test_tcn_can_use_norm_layers(mocker, norm, cls_string):
-    import percussionsynth.models.tcn
+    import drumblender.models.tcn
 
-    spy = mocker.spy(percussionsynth.models.tcn.nn, cls_string)
+    spy = mocker.spy(drumblender.models.tcn.nn, cls_string)
 
     batch_size = 11
     in_channels = 3
@@ -195,7 +195,7 @@ def test_tcn_can_use_norm_layers(mocker, norm, cls_string):
     spy.assert_has_calls([mocker.call(hidden_channels)] * hidden_layers)
     mocker.stop(spy)
 
-    spy = mocker.spy(getattr(percussionsynth.models.tcn.nn, cls_string), "__call__")
+    spy = mocker.spy(getattr(drumblender.models.tcn.nn, cls_string), "__call__")
 
     x = torch.testing.make_tensor(
         batch_size, in_channels, seq_len, device="cpu", dtype=torch.float32
@@ -246,9 +246,9 @@ def test_kick_tcn_use_deterministic_noise_false(mocker):
 
 
 def test_can_use_tfilm_in_tcn(mocker):
-    import percussionsynth.models.tcn
+    import drumblender.models.tcn
 
-    spy = mocker.spy(percussionsynth.models.tcn, "TFiLM")
+    spy = mocker.spy(drumblender.models.tcn, "TFiLM")
 
     batch_size = 11
     in_channels = 3
@@ -274,7 +274,7 @@ def test_can_use_tfilm_in_tcn(mocker):
     spy.assert_has_calls([mocker.call(hidden_channels, block_size)] * hidden_layers)
     mocker.stop(spy)
 
-    spy = mocker.spy(percussionsynth.models.tcn.TFiLM, "__call__")
+    spy = mocker.spy(drumblender.models.tcn.TFiLM, "__call__")
     x = torch.testing.make_tensor(
         batch_size, in_channels, seq_len, device="cpu", dtype=torch.float32
     )
@@ -297,13 +297,13 @@ def test_tcn_throws_if_tfilm_requested_without_block_size():
 
 
 def test_kick_tcn_correctly_forwards_input(mocker):
-    import percussionsynth.models.tcn
+    import drumblender.models.tcn
 
     batch_size = 4
     channels = 1
     seq_len = 16
 
-    spy = mocker.spy(percussionsynth.models.tcn.TCN, "__call__")
+    spy = mocker.spy(drumblender.models.tcn.TCN, "__call__")
 
     net = KickTCN(
         transient=TCN(in_channels=1, hidden_channels=1, out_channels=1),

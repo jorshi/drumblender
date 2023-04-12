@@ -1,15 +1,15 @@
 """
-Tests for the `percussionsynth.data.audio` module.
+Tests for the `drumblender.data.audio` module.
 """
 from pathlib import Path
 
 import pytest
 import torch
 
-from percussionsynth.data import AudioDataset
-from percussionsynth.data import AudioPairWithFeatureDataset
+from drumblender.data import AudioDataset
+from drumblender.data import AudioPairWithFeatureDataset
 
-TESTED_MODULE = "percussionsynth.data.audio"
+TESTED_MODULE = "drumblender.data.audio"
 TEST_DATA_DIR = "test_data"
 TEST_META_FILE = "metadata.json"
 TEST_SAMPLE_RATE = 44100

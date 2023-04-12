@@ -2,8 +2,8 @@ import numpy as np
 import pytest
 import torch
 
-import percussionsynth.utils.audio as audio_utils
-import percussionsynth.utils.modal_analysis as modal_analysis
+import drumblender.utils.audio as audio_utils
+import drumblender.utils.modal_analysis as modal_analysis
 
 # These tests will only run if nnAudio is installed
 nnAudio = pytest.importorskip("nnAudio")

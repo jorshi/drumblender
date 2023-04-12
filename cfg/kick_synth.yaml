@@ -3,7 +3,7 @@
 # Designed to run on a small GPU (2080 Super)
 
 model:
-  class_path: percussionsynth.tasks.KickSynth
+  class_path: drumblender.tasks.KickSynth
   init_args:
     model: models/tcn/kicktcn_film.yaml
     loss_fn: loss/triple_loss.yaml
@@ -26,4 +26,4 @@ trainer:
   callbacks:
     class_path: pytorch_lightning.callbacks.LearningRateMonitor
 seed_everything: 396818285
-#ckpt_path: logs/percussionsynth/f274boeb/checkpoints/epoch=114-step=158585.ckpt
+#ckpt_path: logs/drumblender/f274boeb/checkpoints/epoch=114-step=158585.ckpt

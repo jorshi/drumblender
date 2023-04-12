@@ -4,10 +4,10 @@ from typing import Optional
 import torch
 from torch import nn
 
-from percussionsynth.models.components import FiLM
-from percussionsynth.models.components import GatedActivation
-from percussionsynth.models.components import Pad
-from percussionsynth.models.components import TFiLM
+from drumblender.models.components import FiLM
+from drumblender.models.components import GatedActivation
+from drumblender.models.components import Pad
+from drumblender.models.components import TFiLM
 
 __all__ = ["TCN"]
 

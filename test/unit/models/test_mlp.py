@@ -1,7 +1,7 @@
 import pytest
 import torch
 
-from percussionsynth.models import MLP
+from drumblender.models import MLP
 
 
 @pytest.fixture

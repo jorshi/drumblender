@@ -9,15 +9,15 @@ import pytest
 import torch
 from torch.utils.data import DataLoader
 
-import percussionsynth.utils.data as data_utils
-from percussionsynth.data import KickDataModule
-from percussionsynth.data import KickModalDataModule
-from percussionsynth.data import KickModalEmbeddingDataModule
-from percussionsynth.utils.modal_analysis import CQTModalAnalysis
+import drumblender.utils.data as data_utils
+from drumblender.data import KickDataModule
+from drumblender.data import KickModalDataModule
+from drumblender.data import KickModalEmbeddingDataModule
+from drumblender.utils.modal_analysis import CQTModalAnalysis
 
-# from percussionsynth.data import KickDataset
+# from drumblender.data import KickDataset
 
-TESTED_MODULE = "percussionsynth.data.lightning"
+TESTED_MODULE = "drumblender.data.lightning"
 
 
 @pytest.fixture
@@ -262,7 +262,7 @@ def kick_datamodule(fs, mocker):
     data = KickDataModule()
     fs.create_dir(data.data_dir)
     fs.create_file(Path(data.data_dir).joinpath(data.meta_file))
-    mocker.patch("percussionsynth.data.audio.json.load", side_effect=processed_metadata)
+    mocker.patch("drumblender.data.audio.json.load", side_effect=processed_metadata)
     return KickDataModule()
 
 
@@ -563,7 +563,7 @@ def kick_modal_datamodule(fs, mocker):
     fs.create_dir(data.data_dir)
     fs.create_file(Path(data.data_dir).joinpath(data.meta_file))
     mocker.patch(
-        "percussionsynth.data.audio.json.load", side_effect=processed_modal_metadata
+        "drumblender.data.audio.json.load", side_effect=processed_modal_metadata
     )
     return KickModalDataModule()
 
@@ -619,10 +619,10 @@ def test_kick_modal_data_module_train_data(kick_modal_datamodule, mocker):
 
 def test_kick_modal_embedding_data_module_preprocess(mocker):
     mock_parent_preprocess = mocker.patch(
-        "percussionsynth.data.KickModalDataModule.preprocess_dataset"
+        "drumblender.data.KickModalDataModule.preprocess_dataset"
     )
     mock_preprocess_features = mocker.patch(
-        "percussionsynth.data.KickModalEmbeddingDataModule.preprocess_features"
+        "drumblender.data.KickModalEmbeddingDataModule.preprocess_features"
     )
 
     def fake_embedding_model(x):

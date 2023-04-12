@@ -6,7 +6,7 @@ the expected output given some input audio.
 import pytest
 import torch
 
-from percussionsynth.models import EAT
+from drumblender.models import EAT
 
 
 @pytest.mark.parametrize("embed_dim", [32, 64])

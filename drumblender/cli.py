@@ -9,9 +9,9 @@ from dotenv import load_dotenv
 from jsonargparse import ArgumentParser
 from pytorch_lightning.cli import LightningCLI
 
-import percussionsynth.utils.data as data_utils
-from percussionsynth.callbacks import SaveConfigCallbackWanb
-from percussionsynth.data import KickDataModule
+import drumblender.utils.data as data_utils
+from drumblender.callbacks import SaveConfigCallbackWanb
+from drumblender.data import KickDataModule
 
 
 def run_cli():

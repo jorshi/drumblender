@@ -1,4 +1,4 @@
-# Percussion Synth
+# Drum Blender
 
 ## Install
 
@@ -13,13 +13,13 @@ $ pip install -e ".[dev]"
 Code in this repo is accessed through the PyTorch Lightning CLI, which is available through the `k2k` console script. To see help:
 
 ```bash
-$ percsynth --help
+$ drumblender --help
 ```
 
 To run an experiment, pass the appropriate config file to the `fit` subcommand:
 
 ```bash
-$ percsynth fit -c cfg/regression.yaml
+$ drumblender fit -c cfg/regression.yaml
 ```
 
 And so on.
@@ -28,7 +28,7 @@ And so on.
 To download the unprocessed Kick Drum dataset:
 
 ```bash
-$ percsynth-dataset --unprocessed
+$ drumblender-dataset --unprocessed
 ```
 
 Requires correct authentication credentials for Cloudflare R2. See [cloudflare](https://developers.cloudflare.com/r2/data-access/s3-api/tokens/) for information on generating API tokens.

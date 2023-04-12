@@ -18,13 +18,13 @@ from torch.utils.data import DataLoader
 from torchaudio.datasets.utils import extract_archive
 from tqdm import tqdm
 
-import percussionsynth.utils.audio as audio_utils
-import percussionsynth.utils.data as data_utils
-from percussionsynth.data.audio import AudioDataset
-from percussionsynth.data.audio import AudioPairDataset
-from percussionsynth.data.audio import AudioPairWithFeatureDataset
-from percussionsynth.data.synthetic import MultiplicationDataset
-from percussionsynth.utils.modal_analysis import CQTModalAnalysis
+import drumblender.utils.audio as audio_utils
+import drumblender.utils.data as data_utils
+from drumblender.data.audio import AudioDataset
+from drumblender.data.audio import AudioPairDataset
+from drumblender.data.audio import AudioPairWithFeatureDataset
+from drumblender.data.synthetic import MultiplicationDataset
+from drumblender.utils.modal_analysis import CQTModalAnalysis
 
 
 # Setup logging

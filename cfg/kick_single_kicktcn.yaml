@@ -1,7 +1,7 @@
 # Config for an experiment overfitting a TCN to generate a kick
 
 model:
-  class_path: percussionsynth.tasks.KickSynth
+  class_path: drumblender.tasks.KickSynth
   init_args:
     model: models/tcn/kicktcn.yaml
     loss_fn: loss/triple_loss.yaml
@@ -19,7 +19,7 @@ trainer:
   accelerator: gpu
   max_epochs: 250
   callbacks:
-    - class_path: percussionsynth.callbacks.LogAudioCallback
+    - class_path: drumblender.callbacks.LogAudioCallback
       init_args:
         on_train: true
         on_val: true
