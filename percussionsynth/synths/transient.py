@@ -1,21 +1,19 @@
-from typing import List
-from typing import Optional
-from einops import rearrange
 import numpy as np
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
 import pywt
+import torch
+import torch.nn.functional as F
+from einops import rearrange
 
 
-""" Module to compute the dwt of a signal.
+class WaveletTransform(torch.nn.Module):
+    """Module to compute the dwt of a signal.
 
     Args:
         input_size: signal length
         wavelet: string denoting the type of wavelet to use
         max_level: maximum dwt level
-"""
-class WaveletTransform(torch.nn.Module):
+    """
+
     def __init__(self, input_size: int, wavelet="db2", max_level=None):
         super().__init__()
         self.input_size = input_size
@@ -69,22 +67,21 @@ class WaveletTransform(torch.nn.Module):
 
         multi_dimensional.append(rearrange(x, "b () t -> b t"))
         return multi_dimensional
-    
 
-""" Computes an inverse dwt from a multi dimensional dwt 
+
+def idwt_functional(x, filters):
+    """Computes an inverse dwt from a multi dimensional dwt
     and a set of predicted filters
-    Args:    
+    Args:
         x: list of dwt tensors with format [nb,len]
         filters: tensor of filters with format [nb,levels,type,kw]
-"""
-def InverseWaveletTransformFunctional(x, filters):
-
+    """
     # Group batches as channels and use grouped 1d conv
     prev_lo = rearrange(x[-1], "b t -> 1 b t")
 
-    filters = torch.split(filters,1,dim=1)
+    filters = torch.split(filters, 1, dim=1)
 
-    assert len(x) -1 == len(filters)
+    assert len(x) - 1 == len(filters)
     for i in range(len(filters) - 1, -1, -1):
         y_lo = torch.zeros(1, x[i].shape[0], x[i].shape[1] * 2)
         y_hi = torch.zeros(1, x[i].shape[0], x[i].shape[1] * 2)
@@ -94,26 +91,29 @@ def InverseWaveletTransformFunctional(x, filters):
         y_hi[:, :, ::2] = x[i]
 
         # This leaves a dimension shape of [nb 1 kw] adequate for conv1d
-        rec_lo = filters[i][:,:,0,:]
+        rec_lo = filters[i][:, :, 0, :]
 
         # Apply the filters
-        y_lo = F.conv1d(input=y_lo,
-                        weight=rec_lo,
-                        bias=None,
-                        stride=1,
-                        groups=rec_lo.shape[-3],
-                        padding=rec_lo.shape[-1]//2-1)
-
+        y_lo = F.conv1d(
+            input=y_lo,
+            weight=rec_lo,
+            bias=None,
+            stride=1,
+            groups=rec_lo.shape[-3],
+            padding=rec_lo.shape[-1] // 2 - 1,
+        )
 
         # This leaves a dimension shape of [nb 1 kw] adequate for conv1d
-        rec_hi = filters[i][:,:,1,:]
+        rec_hi = filters[i][:, :, 1, :]
 
-        y_hi = F.conv1d(input=y_hi,
-                        weight=rec_hi,
-                        bias=None,
-                        stride=1,
-                        groups=rec_hi.shape[-3],
-                        padding=rec_hi.shape[-1]//2-1)
+        y_hi = F.conv1d(
+            input=y_hi,
+            weight=rec_hi,
+            bias=None,
+            stride=1,
+            groups=rec_hi.shape[-3],
+            padding=rec_hi.shape[-1] // 2 - 1,
+        )
 
         prev_lo = y_lo + y_hi
 
@@ -121,7 +121,8 @@ def InverseWaveletTransformFunctional(x, filters):
     return y[:, :-1]
 
 
-""" Computes a transform on the Wavelet Space
+class WaveletConv(torch.nn.Module):
+    """Computes a transform on the Wavelet Space
 
     Args:
     num_samples: Lenght of the audio excerpt
@@ -129,20 +130,19 @@ def InverseWaveletTransformFunctional(x, filters):
     max_level: adds a cap on levels.
         Otherwise, this is computed as
             num_levels = int(np.round(np.log2(window_size)))
-"""
-class WaveletConv(torch.nn.Module):
+    """
+
     def __init__(self, num_samples: int, wavelet="db5", max_level=None):
         super().__init__()
         self.dwt = WaveletTransform(num_samples, wavelet=wavelet, max_level=max_level)
 
-    """ Args:
-            x: audio window. format: [nb,samples]
-            filters: tensor of filters with format [nb,levels,type,kw]
-    """
     def forward(self, x, idwt_filters):
+        """Args:
+        x: audio window. format: [nb,samples]
+        filters: tensor of filters with format [nb,levels,type,kw]
+        """
         y = self.dwt(x)
-        return InverseWaveletTransformFunctional(y,idwt_filters)
-
+        return idwt_functional(y, idwt_filters)
 
 
 class WaveletConvOLA(torch.nn.Module):
@@ -197,27 +197,28 @@ class WaveletConvOLA(torch.nn.Module):
         x = rearrange(x, "b 1 1 n -> b n")
         return x
 
-    """ Reconstructs x using dwt and idwt
+    def forward(self, x: torch.tensor, idwt_filters):
+        """Reconstructs x using dwt and idwt
 
         Args:
             x: audio in format [nb,samples]
             idwt_filters: predicted idwt filters
                 format: [nb,windows,levels,type,kw]
-    """
-    def forward(self, x: torch.tensor, idwt_filters):
-
+        """
         # Split in windows
-        idwt_filters = torch.split(idwt_filters,1,dim=1)
+        idwt_filters = torch.split(idwt_filters, 1, dim=1)
         assert len(idwt_filters) == self.num_windows
 
-        x_unfold = self.get_frames(x) #Unfolds the signal
+        x_unfold = self.get_frames(x)  # Unfolds the signal
 
         # Apply wavelet transform to each window
-        x_split = torch.split(x_unfold, 1, dim=2) #Splits into list (each entry is a view)
+        x_split = torch.split(
+            x_unfold, 1, dim=2
+        )  # Splits into list (each entry is a view)
         x_cat = []
         for i in range(self.num_windows):
             # Squeeze window dimension
-            filter = rearrange(idwt_filters[i],"b 1 l t k -> b l t k")
+            filter = rearrange(idwt_filters[i], "b 1 l t k -> b l t k")
             xin = x_split[i].squeeze(-1)
             x_cat.append(self.wavelets[i](xin, filter).unsqueeze(-1))
 
