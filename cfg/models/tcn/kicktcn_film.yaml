@@ -1,7 +1,7 @@
-class_path: kick2kick.models.KickTCN
+class_path: percussionsynth.models.KickTCN
 init_args:
   transient:
-    class_path: kick2kick.models.TCN
+    class_path: percussionsynth.models.TCN
     init_args:
       in_channels: 1
       hidden_channels: 16
@@ -17,7 +17,7 @@ init_args:
       use_temporal_film: false
       temporal_film_block_size: null
   sustain:
-    class_path: kick2kick.models.TCN
+    class_path: percussionsynth.models.TCN
     init_args:
       in_channels: 1
       hidden_channels: 16
@@ -33,7 +33,7 @@ init_args:
       use_temporal_film: false
       temporal_film_block_size: null
   fusion:
-    class_path: kick2kick.models.TCN
+    class_path: percussionsynth.models.TCN
     init_args:
       in_channels: 16
       hidden_channels: 16

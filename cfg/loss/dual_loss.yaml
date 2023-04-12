@@ -1,4 +1,4 @@
-class_path: kick2kick.loss.WeightedLoss
+class_path: percussionsynth.loss.WeightedLoss
 init_args:
   loss_fns:
     - class_path: torch.nn.L1Loss
