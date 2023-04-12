@@ -33,7 +33,7 @@ $ drumblender-dataset --unprocessed
 
 Requires correct authentication credentials for Cloudflare R2. See [cloudflare](https://developers.cloudflare.com/r2/data-access/s3-api/tokens/) for information on generating API tokens.
 
-Save ID and key in an environment variable:
+Save ID and key in a `.env` file in the project root:
 ```bash
 CLOUDFLARE_ACCESS_KEY_ID=xxxx
 CLOUDFLARE_ACCESS_SECRET_KEY=xxxx
