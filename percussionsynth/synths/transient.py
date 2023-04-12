@@ -1,21 +1,19 @@
-from typing import List
-from typing import Optional
-from einops import rearrange
 import numpy as np
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
 import pywt
+import torch
+import torch.nn.functional as F
+from einops import rearrange
 
-# | export
-""" Module to compute the dwt of a signal.
+
+class WaveletTransform(torch.nn.Module):
+    """Module to compute the dwt of a signal.
 
     Args:
         input_size: signal length
         wavelet: string denoting the type of wavelet to use
         max_level: maximum dwt level
-"""
-class WaveletTransform(torch.nn.Module):
+    """
+
     def __init__(self, input_size: int, wavelet="db2", max_level=None):
         super().__init__()
         self.input_size = input_size
@@ -69,23 +67,22 @@ class WaveletTransform(torch.nn.Module):
 
         multi_dimensional.append(rearrange(x, "b () t -> b t"))
         return multi_dimensional
-    
 
 
-""" Computes an inverse dwt from a multi dimensional dwt 
+def idwt_functional(x, filters):
+    """
+    Computes an inverse dwt from a multi dimensional dwt
     and a set of predicted filters
 
-    Args:    
-        x: list of tensors with format [nb,len]
-        filters: list of dictionaries with format
-            filter[i]['rec_lo'] : [nb,kw]
-            filter[i]['rec_hi'] : [nb,kw]
-"""
-def InverseWaveletTransformFunctional(x, filters):
-
+        Args:
+            x: list of tensors with format [nb,len]
+            filters: list of dictionaries with format
+                filter[i]['rec_lo'] : [nb,kw]
+                filter[i]['rec_hi'] : [nb,kw]
+    """
     # Group batches as channels and use grouped 1d conv
     prev_lo = rearrange(x[-1], "b t -> 1 b t")
-    assert len(x) -1 == len(filters)
+    assert len(x) - 1 == len(filters)
     for i in range(len(filters) - 1, -1, -1):
         y_lo = torch.zeros(1, x[i].shape[0], x[i].shape[1] * 2)
         y_hi = torch.zeros(1, x[i].shape[0], x[i].shape[1] * 2)
@@ -94,25 +91,28 @@ def InverseWaveletTransformFunctional(x, filters):
         y_lo[:, :, ::2] = prev_lo
         y_hi[:, :, ::2] = x[i]
 
-        rec_lo = rearrange(filters[i]['rec_lo'], "b k -> b 1 k")
+        rec_lo = rearrange(filters[i]["rec_lo"], "b k -> b 1 k")
 
         # Apply the filters
-        y_lo = F.conv1d(input=y_lo,
-                        weight=rec_lo,
-                        bias=None,
-                        stride=1,
-                        groups=rec_lo.shape[-3],
-                        padding=rec_lo.shape[-1]//2-1)
+        y_lo = F.conv1d(
+            input=y_lo,
+            weight=rec_lo,
+            bias=None,
+            stride=1,
+            groups=rec_lo.shape[-3],
+            padding=rec_lo.shape[-1] // 2 - 1,
+        )
 
+        rec_hi = rearrange(filters[i]["rec_hi"], "b k -> b 1 k")
 
-        rec_hi = rearrange(filters[i]['rec_hi'], "b k -> b 1 k")
-
-        y_hi = F.conv1d(input=y_hi,
-                        weight=rec_hi,
-                        bias=None,
-                        stride=1,
-                        groups=rec_hi.shape[-3],
-                        padding=rec_hi.shape[-1]//2-1)
+        y_hi = F.conv1d(
+            input=y_hi,
+            weight=rec_hi,
+            bias=None,
+            stride=1,
+            groups=rec_hi.shape[-3],
+            padding=rec_hi.shape[-1] // 2 - 1,
+        )
 
         prev_lo = y_lo + y_hi
 
