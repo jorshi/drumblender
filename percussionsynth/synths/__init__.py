@@ -1,3 +1,4 @@
-from percussionsynth.synths.transient import WaveletTransform, InverseWaveletTransformFunctional
+from percussionsynth.synths.transient import idwt_functional
+from percussionsynth.synths.transient import WaveletTransform
 
-__all__ = ["WaveletTransform","InverseWaveletTransformFunctional"]
+__all__ = ["WaveletTransform", "idwt_functional"]
