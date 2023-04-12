@@ -19,17 +19,30 @@ $ drumblender --help
 To run an experiment, pass the appropriate config file to the `fit` subcommand:
 
 ```bash
-$ drumblender fit -c cfg/regression.yaml
+$ drumblender fit -c cfg/kick_single_kicktcn.yaml
 ```
 
 And so on.
 
 ## Dataset
-To download the unprocessed Kick Drum dataset:
+To download a preprocessed dataset from a config file you can use the following
+command. **Note requires R2 access, see below**:
 
 ```bash
-$ drumblender-dataset --unprocessed
+$ drumblender-dataset -c cfg/data/kick_modal_small.yml
 ```
+
+This will download the preprocessed archive and extract it to the appropiate directory.
+
+To preprocess a dataset from raw audio files (make sure to delete pre-processed files
+first). Depending on the preprocessing requirements it may require additional
+packages.
+
+```bash
+$ drumblender-dataset -c cfg/data/kick_modal_small.yml --preprocess
+```
+
+### Cloudflare R2 Access
 
 Requires correct authentication credentials for Cloudflare R2. See [cloudflare](https://developers.cloudflare.com/r2/data-access/s3-api/tokens/) for information on generating API tokens.
 

@@ -1,4 +1,4 @@
-"""Contains components for building kick2kick models.
+"""Contains components for building drumblender models.
 """
 import torch
 from einops import rearrange

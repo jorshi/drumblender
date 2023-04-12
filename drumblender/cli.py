@@ -1,5 +1,5 @@
 """
-kick2kick command line interface entrypoint.
+drumblender command line interface entrypoint.
 """
 import argparse
 import sys
