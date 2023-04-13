@@ -1,4 +1,4 @@
-class_path: kick2kick.models.EAT
+class_path: drumblender.models.EAT
 init_args:
   input_length: 96000
   embed_dim: 128

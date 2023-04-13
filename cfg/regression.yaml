@@ -8,7 +8,7 @@
 # by passing their path, as illustrated below.
 
 model:
-  class_path: kick2kick.tasks.Regression
+  class_path: drumblender.tasks.Regression
   init_args:
     model: models/mlp.yaml
     loss_fn: loss/mse.yaml

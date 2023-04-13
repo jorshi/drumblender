@@ -50,7 +50,7 @@ class CQTModalAnalysis:
         if features is None:
             raise ImportError(
                 "nnAudio is not installed. Please install it to use this class."
-                "You can install it with `pip install kick2kick[modal]`"
+                'You can install it with `pip install -e ".[modal]"`'
             )
 
         self.sample_rate = sample_rate

@@ -3,10 +3,10 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["percussionsynth"]
+packages = ["drumblender"]
 
 [project]
-name = "percussionsynth"
+name = "drumblender"
 version = "0.0.1"
 dependencies = [
     "auraloss",
@@ -18,11 +18,12 @@ dependencies = [
     "tqdm",
     "wandb",
     "python-dotenv",
+    "PyWavelets",
 ]
 
 [project.scripts]
-percsynth = "percussionsynth.cli:main"
-percsynth-dataset = "percussionsynth.cli:dataset"
+drumblender = "drumblender.cli:main"
+drumblender-dataset = "drumblender.cli:dataset"
 
 [project.optional-dependencies]
 dev = ["black", "flake8", "pytest", "pytest-mock", "pyfakefs", "pre-commit", "pytest-cov"]

@@ -3,9 +3,9 @@ import pywt
 import torch
 from einops import repeat
 
-from percussionsynth.synths import idwt_functional
-from percussionsynth.synths import WaveletConvOLA
-from percussionsynth.synths import WaveletTransform
+from drumblender.synths import idwt_functional
+from drumblender.synths import WaveletConvOLA
+from drumblender.synths import WaveletTransform
 
 
 def test_wavelet_reconstruction():

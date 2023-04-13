@@ -1,10 +1,10 @@
-class_path: kick2kick.loss.WeightedLoss
+class_path: drumblender.loss.WeightedLoss
 init_args:
   loss_fns:
     - class_path: torch.nn.L1Loss
       init_args:
         reduction: mean
-    - class_path: kick2kick.loss.FirstOrderDifferenceLoss
+    - class_path: drumblender.loss.FirstOrderDifferenceLoss
       init_args:
         reduction: mean
     - class_path: auraloss.freq.MultiResolutionSTFTLoss

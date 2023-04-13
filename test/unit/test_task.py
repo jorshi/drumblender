@@ -2,7 +2,7 @@ from typing import Optional
 
 import torch
 
-from percussionsynth.tasks import KickSynth
+from drumblender.tasks import KickSynth
 
 
 class FakeSynthModel(torch.nn.Module):

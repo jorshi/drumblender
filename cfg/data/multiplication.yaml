@@ -1,4 +1,4 @@
-class_path: kick2kick.data.MultiplicationDataModule
+class_path: drumblender.data.MultiplicationDataModule
 init_args:
   train_size: 10000
   val_size: 1000

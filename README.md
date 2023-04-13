@@ -1,4 +1,4 @@
-# Percussion Synth
+# Drum Blender
 
 ## Install
 
@@ -13,27 +13,40 @@ $ pip install -e ".[dev]"
 Code in this repo is accessed through the PyTorch Lightning CLI, which is available through the `k2k` console script. To see help:
 
 ```bash
-$ percsynth --help
+$ drumblender --help
 ```
 
 To run an experiment, pass the appropriate config file to the `fit` subcommand:
 
 ```bash
-$ percsynth fit -c cfg/regression.yaml
+$ drumblender fit -c cfg/kick_single_kicktcn.yaml
 ```
 
 And so on.
 
 ## Dataset
-To download the unprocessed Kick Drum dataset:
+To download a preprocessed dataset from a config file you can use the following
+command. **Note requires R2 access, see below**:
 
 ```bash
-$ percsynth-dataset --unprocessed
+$ drumblender-dataset -c cfg/data/kick_modal_small.yml
 ```
+
+This will download the preprocessed archive and extract it to the appropiate directory.
+
+To preprocess a dataset from raw audio files (make sure to delete pre-processed files
+first). Depending on the preprocessing requirements it may require additional
+packages.
+
+```bash
+$ drumblender-dataset -c cfg/data/kick_modal_small.yml --preprocess
+```
+
+### Cloudflare R2 Access
 
 Requires correct authentication credentials for Cloudflare R2. See [cloudflare](https://developers.cloudflare.com/r2/data-access/s3-api/tokens/) for information on generating API tokens.
 
-Save ID and key in an environment variable:
+Save ID and key in a `.env` file in the project root:
 ```bash
 CLOUDFLARE_ACCESS_KEY_ID=xxxx
 CLOUDFLARE_ACCESS_SECRET_KEY=xxxx

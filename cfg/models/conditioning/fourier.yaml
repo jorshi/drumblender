@@ -1,4 +1,4 @@
-class_path: kick2kick.models.conditioning.RandomFourierFeatureConditioning
+class_path: drumblender.models.conditioning.RandomFourierFeatureConditioning
 init_args:
   output_channels: 64
   freq_scale: 1000

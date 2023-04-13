@@ -1,11 +1,11 @@
 """
-Tests for the `percussionsynth.loss` module.
+Tests for the `drumblender.loss` module.
 """
 import jsonargparse
 import pytest
 import torch
 
-import percussionsynth.loss as loss
+import drumblender.loss as loss
 
 
 def test_first_order_difference_loss():
@@ -49,7 +49,7 @@ def test_weighted_loss_with_jsonargparse_config(monkeypatch):
 
     config = (
         "loss:\n"
-        "  class_path: percussionsynth.loss.WeightedLoss\n"
+        "  class_path: drumblender.loss.WeightedLoss\n"
         "  init_args:\n"
         "    loss_fns: \n"
         "    - class_path: torch.nn.L1Loss\n"

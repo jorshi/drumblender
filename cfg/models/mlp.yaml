@@ -1,4 +1,4 @@
-class_path: kick2kick.models.MLP
+class_path: drumblender.models.MLP
 init_args:
   input_size: 2
   hidden_size: 32

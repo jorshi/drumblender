@@ -20,19 +20,19 @@ def import_class(class_path: str):
 
 TEST_TYPES = dict(
     loss_cfg=dict(
-        pathname="cfg/loss/*.yaml",
+        pathname="cfg/loss/**/*.yaml",
         recursive=True,
     ),
     data_cfg=dict(
-        pathname="cfg/data/*.yaml",
+        pathname="cfg/data/**/*.yaml",
         recursive=True,
     ),
     model_cfg=dict(
-        pathname="cfg/models/*.yaml",
+        pathname="cfg/models/**/*.yaml",
         recursive=True,
     ),
     optimizer_cfg=dict(
-        pathname="cfg/optimizer/*.yaml",
+        pathname="cfg/optimizer/**/*.yaml",
         recursive=True,
     ),
     experiment_cfg=dict(

@@ -1,4 +1,4 @@
-class_path: kick2kick.models.TCN
+class_path: drumblender.models.TCN
 init_args:
   in_channels: 1
   hidden_channels: 32

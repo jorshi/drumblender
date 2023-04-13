@@ -1,7 +1,7 @@
 import pytest
 import torch
 
-from percussionsynth.synths import NoiseGenerator
+from drumblender.synths import NoiseGenerator
 
 
 @pytest.fixture

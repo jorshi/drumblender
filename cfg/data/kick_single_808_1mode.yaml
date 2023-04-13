@@ -1,8 +1,8 @@
-class_path: kick2kick.data.KickModalDataModule
+class_path: drumblender.data.KickModalDataModule
 init_args:
   batch_size: 1
   num_workers: 0
-  dataset_class: kick2kick.data.AudioPairDataset
+  dataset_class: drumblender.data.AudioPairDataset
   url: https://d5d740b2d880827ae0c8f465bf180715.r2.cloudflarestorage.com
   archive: k2k-single-808-1mode-v1.tar.gz
   bucket: drum-dataset

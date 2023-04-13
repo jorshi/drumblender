@@ -1,7 +1,7 @@
 import pytest
 import torch
 
-from percussionsynth.synths import ModalSynthFreqs
+from drumblender.synths import ModalSynthFreqs
 
 
 @pytest.fixture
