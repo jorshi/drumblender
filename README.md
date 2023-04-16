@@ -29,7 +29,7 @@ To download a preprocessed dataset from a config file you can use the following
 command. **Note requires R2 access, see below**:
 
 ```bash
-$ drumblender-dataset -c cfg/data/kick_modal_small.yml
+$ drumblender-dataset cfg/data/singles/kick_single_modal.yml
 ```
 
 This will download the preprocessed archive and extract it to the appropiate directory.
@@ -39,7 +39,7 @@ first). Depending on the preprocessing requirements it may require additional
 packages.
 
 ```bash
-$ drumblender-dataset -c cfg/data/kick_modal_small.yml --preprocess
+$ drumblender-dataset cfg/data/singles/kick_single_modal.yml --preprocess
 ```
 
 ### Cloudflare R2 Access
