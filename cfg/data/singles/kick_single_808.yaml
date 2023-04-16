@@ -4,7 +4,7 @@ init_args:
   num_workers: 0
   dataset_class: drumblender.data.AudioPairDataset
   url: https://d5d740b2d880827ae0c8f465bf180715.r2.cloudflarestorage.com
-  archive: null
+  archive: drumblender-808-kick-single-v0.tar.gz
   bucket: drum-dataset
   data_dir: dataset/808-kick-single
   data_dir_unprocessed: dataset-unprocessed/808-kick-single
