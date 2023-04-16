@@ -52,7 +52,8 @@ def preprocess_audio_file(
         )(waveform)
 
     # Remove silent samples from the beginning of the waveform
-    waveform = cut_start_silence(waveform, threshold_db=silence_threshold_db)
+    if remove_start_silence:
+        waveform = cut_start_silence(waveform, threshold_db=silence_threshold_db)
 
     # Truncate or pad the waveform to the desired number of samples
     if num_samples is not None and waveform.shape[1] != num_samples:
