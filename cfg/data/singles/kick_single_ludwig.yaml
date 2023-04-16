@@ -4,10 +4,10 @@ init_args:
   num_workers: 0
   dataset_class: drumblender.data.AudioPairDataset
   url: https://d5d740b2d880827ae0c8f465bf180715.r2.cloudflarestorage.com
-  archive: k2k-single-ludwig-1mode-v1.tar.gz
+  archive: null
   bucket: drum-dataset
-  data_dir: dataset/ludwig-single-1mode
-  data_dir_unprocessed: dataset-unprocessed/ludwig-single-1mode
+  data_dir: dataset/ludwig-kick-single
+  data_dir_unprocessed: dataset-unprocessed/ludwig-kick-single
   meta_file: kick-single-ludwig-1.json
   sample_rate: 48000
   num_samples: 96000

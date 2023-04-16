@@ -1,7 +1,0 @@
-class_path: drumblender.data.MultiplicationDataModule
-init_args:
-  train_size: 10000
-  val_size: 1000
-  test_size: 1000
-  batch_size: 16
-  num_workers: 4
