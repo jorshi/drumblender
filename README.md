@@ -1,11 +1,17 @@
 # Drum Blender
 
-## Install
+## Install 
 
 To install with development dependencies:
 
 ```bash
 $ pip install -e ".[dev]"
+```
+
+Install pre-commit hooks if developing and contributing:
+
+```bach
+$ pre-commit install
 ```
 
 ## Run
