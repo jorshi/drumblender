@@ -365,6 +365,9 @@ class ModalDataModule(AudioDataModule):
             waveform, _ = torchaudio.load(audio_file)
             modal_freqs, modal_amps, modal_phases = modal(waveform)
 
+            # Frequencies are returned in Hz, convert to angular
+            modal_freqs = 2 * torch.pi * modal_freqs / self.sample_rate
+
             # Stack the freqs, amps, and phases into a single tensor and remove
             # the single batch dimension, since there is only one sample
             # Output shape is (3, num_modes, num_frames)
@@ -380,7 +383,6 @@ class ModalDataModule(AudioDataModule):
                 modal_audio = audio_utils.modal_synth(
                     modal_freqs,
                     modal_amps,
-                    self.sample_rate,
                     self.num_samples,
                 )
                 modal_audio_file = audio_file.parent.joinpath(
