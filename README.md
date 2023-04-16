@@ -35,11 +35,16 @@ $ drumblender-dataset cfg/data/singles/kick_single_modal.yml
 This will download the preprocessed archive and extract it to the appropiate directory.
 
 To preprocess a dataset from raw audio files (make sure to delete pre-processed files
-first). Depending on the preprocessing requirements it may require additional
-packages.
+first).
 
 ```bash
 $ drumblender-dataset cfg/data/singles/kick_single_modal.yml --preprocess
+```
+
+For modal extraction nnAudio is required. Install using:
+
+```bash
+$ pip install ".[modal]"
 ```
 
 ### Cloudflare R2 Access
