@@ -30,6 +30,7 @@ class CQTModalAnalysis:
         min_length: int = 4,
         num_modes: Optional[int] = None,
         threshold: float = -80.0,
+        diff_threshold: float = 2.5,
         **kwargs,
     ) -> None:
         """
@@ -61,6 +62,7 @@ class CQTModalAnalysis:
         self.min_length = min_length
         self.num_modes = num_modes
         self.threshold = threshold
+        self.diff_threshold = diff_threshold / 100.0
 
         self.cqt = features.CQT(
             sr=sample_rate,
@@ -204,7 +206,7 @@ class CQTModalAnalysis:
 
                     # If the difference is less than 2.5% of the previous frequency,
                     # then we assume that the peak is the same mode
-                    if np.min(peak_diff) < prev_freq * 0.025:
+                    if np.min(peak_diff) < prev_freq * self.diff_threshold:
                         closest_peak = np.argmin(peak_diff)
                         freqs[j].append(peaks_loc[closest_peak])
                         amps[j].append(peaks_mag[closest_peak])

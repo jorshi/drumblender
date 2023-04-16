@@ -4,8 +4,6 @@ import json
 import logging
 import os
 from pathlib import Path
-from typing import Any
-from typing import Callable
 from typing import Dict
 from typing import Optional
 from typing import Type
@@ -22,8 +20,6 @@ import drumblender.utils.audio as audio_utils
 import drumblender.utils.data as data_utils
 from drumblender.data.audio import AudioDataset
 from drumblender.data.audio import AudioPairDataset
-from drumblender.data.audio import AudioPairWithFeatureDataset
-from drumblender.data.synthetic import MultiplicationDataset
 from drumblender.utils.modal_analysis import CQTModalAnalysis
 
 
@@ -33,82 +29,9 @@ log = logging.getLogger(__name__)
 log.setLevel(level=os.environ.get("LOGLEVEL", "INFO"))
 
 
-class MultiplicationDataModule(pl.LightningDataModule):
-    """LightningDataModule for MultiplicationDataset.
-
-    Args:
-      train_size(int): Training set size, defaults to 5000
-      val_size(int): Validation set size, defaults to 750
-      test_size(int): Test set size, defaults to 750
-      batch_size(int): Batch size, defaults to 32
-      num_workers(int): Number of workers, defaults to 4
-      train_seed(int): Training set PRNG seed, defaults to 0
-      val_seed(int): Validation set PRNG seed, defaults to 1
-      test_seed(int): Test set PRNG seed, defaults to 2
-
-    Returns:
-
+class AudioDataModule(pl.LightningDataModule):
     """
-
-    def __init__(
-        self,
-        train_size: int = 5000,
-        val_size: int = 750,
-        test_size: int = 750,
-        batch_size: int = 32,
-        num_workers: int = 4,
-        train_seed: int = 0,
-        val_seed: int = 1,
-        test_seed: int = 2,
-    ):
-        super().__init__()
-        self.batch_size = batch_size
-        self.num_workers = num_workers
-
-    def setup(self, stage=None):
-        """
-
-        Args:
-          stage: (Default value = None)
-
-        Returns:
-
-        """
-        self.train_dataset = MultiplicationDataset(1000)
-        self.val_dataset = MultiplicationDataset(100)
-        self.test_dataset = MultiplicationDataset(100)
-
-    def train_dataloader(self):
-        """ """
-        return DataLoader(
-            self.train_dataset,
-            batch_size=self.batch_size,
-            num_workers=self.num_workers,
-            shuffle=True,
-        )
-
-    def val_dataloader(self):
-        """ """
-        return DataLoader(
-            self.val_dataset,
-            batch_size=self.batch_size,
-            num_workers=self.num_workers,
-            shuffle=False,
-        )
-
-    def test_dataloader(self):
-        """ """
-        return DataLoader(
-            self.test_dataset,
-            batch_size=self.batch_size,
-            num_workers=self.num_workers,
-            shuffle=False,
-        )
-
-
-class KickDataModule(pl.LightningDataModule):
-    """
-    LightningDataModule for the Kick dataset. This class is responsible for downloading
+    LightningDataModule for the audio dataset. This class is responsible for downloading
     and extracting a preprocessed dataset, or downloading and preprocessing the
     raw audio files if the preprocessed dataset is not available.
 
@@ -313,9 +236,9 @@ class KickDataModule(pl.LightningDataModule):
         data_utils.create_tarfile(archive_name, self.data_dir)
 
 
-class KickModalDataModule(KickDataModule):
+class ModalDataModule(AudioDataModule):
     """
-    DataModule for the modal kick dataset. In addition to the origin kick waveform,
+    DataModule for the modal audio dataset. In addition to the origin audio waveform,
     this also contains a synthesized waveform containing only the modal components,
     extracted from the original waveform using sinusoidal modeling.
 
@@ -347,6 +270,8 @@ class KickModalDataModule(KickDataModule):
         n_bins: Number of bins for the CQT used in sinusoidal modelling, defaults to 96
         bins_per_octave: Number of bins per octave for the CQT used in sinusoidal
             modelling, defaults to 12
+        diff_threshold: Maximum difference in percent to consider two frequencies
+            to be part of the same sinusoidal track.
         save_modal_audio: Whether to save the modal audio files, defaults to True
     """
 
@@ -371,6 +296,7 @@ class KickModalDataModule(KickDataModule):
         fmin=20,
         n_bins=96,
         bins_per_octave=12,
+        diff_threshold=5.0,
         save_modal_audio=True,
     ):
         # Set default values for the file_keys in the Dataset -- these are the filename
@@ -403,6 +329,7 @@ class KickModalDataModule(KickDataModule):
         self.fmin = fmin
         self.n_bins = n_bins
         self.bins_per_octave = bins_per_octave
+        self.diff_threshold = diff_threshold
         self.save_modal_audio = save_modal_audio
 
     def preprocess_dataset(self) -> None:
@@ -430,6 +357,7 @@ class KickModalDataModule(KickDataModule):
             min_length=self.min_length,
             num_modes=self.num_modes,
             threshold=self.threshold,
+            diff_threshold=self.diff_threshold,
         )
 
         for key, item in tqdm(metadata.items()):
@@ -469,96 +397,5 @@ class KickModalDataModule(KickDataModule):
             metadata[key]["feature_file"] = str(modal_file.relative_to(self.data_dir))
 
         # Save the new metadata
-        with open(Path(self.data_dir).joinpath(self.meta_file), "w") as f:
-            json.dump(metadata, f)
-
-
-class KickModalEmbeddingDataModule(KickModalDataModule):
-    """
-    DataModule for training a model using audio pairs of an original kick drum
-    and a modal synthesis of the original kick drum, along with a pre-computed
-    feature embedding of the original kick drum.
-
-    #TODO: Maybe there is a way to generalize this along with the modal feature
-    extraction as opposed to this child class.
-    For example, a DataModule that takes a list of feature extractors
-    as a list of callables.
-
-    Args:
-        embedding_model: A callable that takes a waveform and returns an embedding
-        feature_prefix: The prefix of the feature file to use for the embedding,
-            this is appended to the filename of the audio of the original kick drum
-        flatten: Whether to flatten the embedding feature before saving it
-        dataset_class: The dataset class to use for the dataloader. Defaults to
-            `AudioPairWithFeatureDataset`, which returns pairs of audio plus a feature
-            tensor
-        dataset_kwargs: Additional keyword arguments to pass to the dataset class
-        **kwargs: Additional keyword arguments to pass to KickModalDataModule
-    """
-
-    def __init__(
-        self,
-        embedding_model: Callable,
-        feature_prefix: str,
-        flatten: bool = False,
-        dataset_class: Type[AudioPairWithFeatureDataset] = AudioPairWithFeatureDataset,
-        dataset_kwargs: Dict[str, Any] = None,
-        **kwargs,
-    ):
-        # Create the feature key that will be saved in the metadata and will
-        # tell the dataset which feature file to load
-        self.feature_prefix = feature_prefix
-        self.feature_key = f"{feature_prefix}_feature_file"
-
-        dataset_kwargs = dataset_kwargs or {}
-        dataset_kwargs["feature_key"] = self.feature_key
-        super().__init__(
-            dataset_class=dataset_class, dataset_kwargs=dataset_kwargs, **kwargs
-        )
-
-        self.feature_embedding = embedding_model
-        self.flatten = flatten
-
-    def preprocess_dataset(self) -> None:
-        super().preprocess_dataset()
-        self.preprocess_features()
-
-    def preprocess_features(self, overwrite: bool = False) -> None:
-        log.info(f"Extracting embedding features using {repr(self.feature_embedding)}")
-        with open(Path(self.data_dir).joinpath(self.meta_file), "r") as f:
-            metadata = json.load(f)
-
-        # Create a feature directory
-        feature_dir = Path(self.data_dir).joinpath("features")
-        feature_dir.mkdir(parents=True, exist_ok=True)
-
-        for key, item in tqdm(metadata.items()):
-            audio_file = Path(self.data_dir).joinpath(item["filename"])
-            waveform, sr = torchaudio.load(audio_file)
-            assert (
-                sr == self.sample_rate
-            ), f"Sample rate mismatch: {sr} != {self.sample_rate}"
-
-            # Extract the features
-            embedding = self.feature_embedding(waveform)
-            if self.flatten:
-                embedding = torch.flatten(embedding)
-
-            # Save the modal features
-            feature_file = f"{audio_file.stem}_{self.feature_prefix}.pt"
-            feature_file = feature_dir.joinpath(feature_file)
-
-            # Avoid overwriting existing features
-            if feature_file.exists() and not overwrite:
-                raise FileExistsError("Feature file already exists.")
-
-            torch.save(embedding, feature_file)
-
-            # Update the metadata
-            metadata[key][self.feature_key] = str(
-                feature_file.relative_to(self.data_dir)
-            )
-
-        # Save the updated metadata
         with open(Path(self.data_dir).joinpath(self.meta_file), "w") as f:
             json.dump(metadata, f)
