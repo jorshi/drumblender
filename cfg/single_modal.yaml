@@ -6,12 +6,24 @@ model:
       class_path: drumblender.models.encoders.ModalAmpParameters
       init_args:
         num_modes: 64
+    transient_synth:
+      class_path: drumblender.synths.TransientTCN
+      init_args:
+        in_channels: 1
+        hidden_channels: 32
+        out_channels: 1
+        dilation_base: 2
+        dilation_blocks: 8
+        num_layers: 8
+        kernel_size: 13
+        transient_conditioning: false
+        transient_conditioning_channels: 31
     loss_fn: loss/mss.yaml
 optimizer:
   class_path: torch.optim.Adam
   init_args:
-    lr: 0.001
-data: data/singles/snare_single_cajon.yaml
+    lr: 0.0001
+data: data/singles/crash-pop-single.yaml
 trainer:
   devices: [0]
   accelerator: gpu

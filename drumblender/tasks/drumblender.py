@@ -91,7 +91,6 @@ class DrumBlender(pl.LightningModule):
         y_hat = self.modal_synth(modal_params, original.shape[-1])
 
         if self.transient_synth is not None:
-            assert transient_params is not None, "Transient params must be provided"
             y_hat = self.transient_synth(y_hat, transient_params)
 
         if self.noise_synth is not None:
