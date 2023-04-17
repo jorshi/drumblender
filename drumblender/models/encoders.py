@@ -3,8 +3,9 @@ Encoders for the synthesis models
 """
 from typing import Optional
 
-from einops import repeat
 import torch
+from einops import repeat
+
 
 class DummyParameterEncoder(torch.nn.Module):
     """
@@ -27,8 +28,10 @@ class ModalAmpParameters(DummyParameterEncoder):
 
     def __init__(self, num_modes: int):
         super().__init__(torch.Size([num_modes]))
-    
-    def forward(self, params: Optional[torch.tensor], embedding: Optional[torch.tensor] = None):
+
+    def forward(
+        self, params: Optional[torch.tensor], embedding: Optional[torch.tensor] = None
+    ):
         assert params.ndim == 4
         batch_size, num_params, num_modes, num_steps = params.shape
         assert num_params == 3

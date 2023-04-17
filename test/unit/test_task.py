@@ -2,8 +2,8 @@ from typing import Optional
 
 import torch
 
-from drumblender.tasks import KickSynth
 from drumblender.tasks import DrumBlender
+from drumblender.tasks import KickSynth
 
 
 class FakeSynthModel(torch.nn.Module):
@@ -132,12 +132,11 @@ def test_drumblender_can_be_instantiated(mocker):
 
 
 def test_drumblender_can_forward(mocker):
-    
     class FakeSynth(torch.nn.Module):
         def __init__(self, output):
             super().__init__()
             self.output = output
-        
+
         def forward(self, p):
             return self.output
 
@@ -152,9 +151,9 @@ def test_drumblender_can_forward(mocker):
     num_steps = 400
     x = torch.rand(batch_size, 1, 1)
     p = torch.rand(batch_size, num_params, num_modes, num_steps)
-    
+
     model = DrumBlender(modal_synth=modal_synth, loss_fn=loss_fn)
     y = model(x, p)
-    
+
     assert y == expected_output
     modal_spy.assert_called_once_with(p)
