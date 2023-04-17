@@ -18,6 +18,17 @@ model:
         kernel_size: 13
         transient_conditioning: false
         transient_conditioning_channels: 31
+    noise_synth:
+      class_path: drumblender.synths.NoiseGenerator
+      init_args:
+        window_size: 1024
+    noise_autoencoder:
+      class_path: drumblender.models.encoders.DummyParameterEncoder
+      init_args:
+        param_shape:
+          - 1
+          - 189
+          - 60
     loss_fn: loss/mss.yaml
 optimizer:
   class_path: torch.optim.Adam

@@ -2,6 +2,8 @@
 Encoders for the synthesis models
 """
 from typing import Optional
+from typing import Tuple
+from typing import Union
 
 import torch
 from einops import repeat
@@ -12,7 +14,7 @@ class DummyParameterEncoder(torch.nn.Module):
     Dummy encoder returns a set of learnable parameters
     """
 
-    def __init__(self, param_shape: torch.Size):
+    def __init__(self, param_shape: Union[Tuple, torch.Size]):
         super().__init__()
         self.params = torch.nn.Parameter(torch.rand(param_shape))
 
