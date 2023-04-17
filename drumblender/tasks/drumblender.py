@@ -88,7 +88,7 @@ class DrumBlender(pl.LightningModule):
             transient_params = self.transient_autoencoder(embedding)
 
         # Synthesis
-        y_hat = self.modal_synth(modal_params)
+        y_hat = self.modal_synth(modal_params, original.shape[-1])
 
         if self.transient_synth is not None:
             assert transient_params is not None, "Transient params must be provided"
@@ -102,10 +102,10 @@ class DrumBlender(pl.LightningModule):
         return y_hat
 
     def _do_step(self, batch: Tuple[torch.Tensor, ...]):
-        if len(batch) == 2:
-            original, params = batch
+        if len(batch) == 3:
+            original, _, params = batch
         else:
-            raise ValueError("Expected batch to be a tuple of length 2 or 3")
+            raise ValueError("Expected batch to be a tuple of length 3")
 
         y_hat = self(original, params)
 

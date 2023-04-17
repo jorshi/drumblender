@@ -1,0 +1,19 @@
+model:
+  class_path: drumblender.tasks.DrumBlender
+  init_args:
+    modal_synth: drumblender.synths.ModalSynth
+    modal_autoencoder:
+      class_path: drumblender.models.encoders.ModalAmpParameters
+      init_args:
+        num_modes: 64
+    loss_fn: loss/mss.yaml
+optimizer:
+  class_path: torch.optim.Adam
+  init_args:
+    lr: 0.001
+data: data/singles/snare_single_cajon.yaml
+trainer:
+  devices: [0]
+  accelerator: gpu
+  max_epochs: 200
+seed_everything: 396818285
