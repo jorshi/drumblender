@@ -3,6 +3,7 @@ from typing import Optional
 import torch
 
 from drumblender.tasks import KickSynth
+from drumblender.tasks import DrumBlender
 
 
 class FakeSynthModel(torch.nn.Module):
@@ -118,3 +119,42 @@ def test_kick_synth_task_uses_both_conditioning_and_embedding(mocker):
     spy_model.assert_called_once_with(
         fake_conditioning_model(audio), fake_embedding_model(audio)
     )
+
+
+def test_drumblender_can_be_instantiated(mocker):
+    modal_synth = mocker.stub("modal_synth")
+    loss_fn = mocker.stub("loss_fn")
+
+    model = DrumBlender(modal_synth=modal_synth, loss_fn=loss_fn)
+    assert model is not None
+    assert model.modal_synth == modal_synth
+    assert model.loss_fn == loss_fn
+
+
+def test_drumblender_can_forward(mocker):
+    
+    class FakeSynth(torch.nn.Module):
+        def __init__(self, output):
+            super().__init__()
+            self.output = output
+        
+        def forward(self, p):
+            return self.output
+
+    loss_fn = mocker.stub("loss_fn")
+    expected_output = torch.rand(1, 1)
+    modal_synth = FakeSynth(expected_output)
+    modal_spy = mocker.spy(modal_synth, "forward")
+
+    batch_size = 7
+    num_params = 3
+    num_modes = 45
+    num_steps = 400
+    x = torch.rand(batch_size, 1, 1)
+    p = torch.rand(batch_size, num_params, num_modes, num_steps)
+    
+    model = DrumBlender(modal_synth=modal_synth, loss_fn=loss_fn)
+    y = model(x, p)
+    
+    assert y == expected_output
+    modal_spy.assert_called_once_with(p)

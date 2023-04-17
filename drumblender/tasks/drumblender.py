@@ -16,19 +16,24 @@ class DrumBlender(pl.LightningModule):
     """
     LightningModule for kick synthesis from a modal frequency input
 
+    # TODO: Alot of these are currently optional to help with testing and devlopment,
+    # but they should be required in the future
+
     Args:
-        model(nn.Module): A PyTorch model, which will be trained.
-        loss_fn(Callable): A loss function
-        conditioning_model(nn.Module): A PyTorch model, which will be used to
-            condition the synthesis model. If None, the modal input will be used.
-        embedding_model(nn.Module): A PyTorch model, which will be used to create
-            an embedding from the original audio or pre-computed features.
-            This embedding is then passed into the synthesis model as the
-            FiLM conditioning. If None, raw features (if available) will be used.
-        save_test_audio(bool): If True, the audio from the test batch will be saved
-        save_audio_sr(int): The sample rate to use when saving audio
-        batch_ids_to_save(Tuple[int, ...]): The batch ids to save audio for. If None,
-            all batches will be saved.
+        modal_synth (nn.Module): Synthesis model takes modal parameters and generates
+            audio
+        loss_fn (Union[Callable, nn.Module]): Loss function to use for training
+        noise_synth (Optional[nn.Module]): Receives noise parameters and generates
+            noise audio signal
+        transient_synth (Optional[nn.Module]): Receives audio plus transient parameters
+            and generates transient audio signal
+        modal_autoencoder (Optional[nn.Module]): Receives main embedding and
+            generates modal parameters
+        noise_autoencoder (Optional[nn.Module]): Receives main embedding and
+            generates noise parameters
+        transient_autoencoder (Optional[nn.Module]): Receives main embedding and
+            generates transient parameters
+        encoder (Optional[nn.Module]): Receives audio and generates main embedding
         float32_matmul_precision(Literal["medium", "high", "highest", None]): Sets
             the precision of float32 matmul operations.
     """
@@ -48,17 +53,13 @@ class DrumBlender(pl.LightningModule):
         super().__init__()
 
         self.modal_synth = modal_synth
-        self.modal_autoencoder = modal_autoencoder
-
-        self.noise_synth = noise_synth
-        self.noise_autoencoder = noise_autoencoder
-
-        self.transient_synth = transient_synth
-        self.transient_autoencoder = transient_autoencoder
-
-        self.encoder = encoder
-
         self.loss_fn = loss_fn
+        self.noise_synth = noise_synth
+        self.transient_synth = transient_synth
+        self.modal_autoencoder = modal_autoencoder
+        self.noise_autoencoder = noise_autoencoder
+        self.transient_autoencoder = transient_autoencoder
+        self.encoder = encoder
 
         if float32_matmul_precision is not None:
             torch.set_float32_matmul_precision(float32_matmul_precision)
@@ -73,20 +74,31 @@ class DrumBlender(pl.LightningModule):
         if self.encoder is not None:
             embedding = self.encoder(original)
 
-        # Autoencoder
-        modal_params = self.modal_autoencoder(params, embedding)
+        # Modal parameter autoencoder
+        modal_params = params
+        if self.modal_autoencoder is not None:
+            modal_params = self.modal_autoencoder(params, embedding)
 
-        noise_params = self.noise_autoencoder(embedding)
-        transient_params = self.transient_autoencoder(embedding)
+        noise_params = None
+        if self.noise_autoencoder is not None:
+            noise_params = self.noise_autoencoder(embedding)
+
+        transient_params = None
+        if self.transient_autoencoder is not None:
+            transient_params = self.transient_autoencoder(embedding)
 
         # Synthesis
-        modes = self.modal_synth(modal_params)
+        y_hat = self.modal_synth(modal_params)
 
-        modes_transients = self.transient_synth(modes, transient_params)
+        if self.transient_synth is not None:
+            assert transient_params is not None, "Transient params must be provided"
+            y_hat = self.transient_synth(y_hat, transient_params)
 
-        noise = self.noise_synth(noise_params)
+        if self.noise_synth is not None:
+            assert noise_params is not None, "Noise params must be provided"
+            noise = self.noise_synth(noise_params)
+            y_hat = y_hat + noise
 
-        y_hat = modes_transients + noise
         return y_hat
 
     def _do_step(self, batch: Tuple[torch.Tensor, ...]):
