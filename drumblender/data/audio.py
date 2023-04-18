@@ -46,7 +46,7 @@ class AudioDataset(Dataset):
         num_samples: int,
         split: Optional[str] = None,
         seed: int = 42,
-        split_strategy: Literal["sample_pack", "random"] = "sample_pack",
+        split_strategy: Literal["sample_pack", "random"] = "random",
         normalize: bool = False,
         sample_types: Optional[List[str]] = None,
     ):

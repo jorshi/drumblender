@@ -306,7 +306,11 @@ def test_audio_datamodule_train_data(kick_datamodule, mocker):
     )
 
     batch = next(iter(train_loader))
-    assert batch.shape == (kick_datamodule.batch_size, 1, kick_datamodule.num_samples)
+    assert batch[0].shape == (
+        kick_datamodule.batch_size,
+        1,
+        kick_datamodule.num_samples,
+    )
 
 
 def test_modal_datamodule_init():
