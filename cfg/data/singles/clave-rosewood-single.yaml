@@ -1,0 +1,24 @@
+class_path: drumblender.data.ModalDataModule
+init_args:
+  batch_size: 1
+  num_workers: 0
+  dataset_class: drumblender.data.AudioPairDataset
+  url: https://d5d740b2d880827ae0c8f465bf180715.r2.cloudflarestorage.com
+  archive: drumblender-clave-rosewood-single-v0.tar.gz
+  bucket: drum-dataset
+  data_dir: dataset/clave-rosewood-single
+  data_dir_unprocessed: dataset-unprocessed/clave-rosewood-single
+  meta_file: clave-rosewood-single-1.json
+  sample_rate: 48000
+  num_samples: 96000
+  num_modes: 64
+  threshold: -80.0
+  min_length: 10
+  hop_length: 256
+  fmin: 20
+  n_bins: 168
+  bins_per_octave: 24
+  diff_threshold: 5.0
+  dataset_kwargs:
+    seed: 42
+    feature_key: feature_file

@@ -17,7 +17,7 @@ lr_scheduler:
   class_path: torch.optim.lr_scheduler.ExponentialLR
   init_args:
     gamma: 0.99
-data: data/kick_modal.yaml
+data: data/kick_modal_params.yaml
 trainer:
   # devices: [0]
   # accelerator: gpu

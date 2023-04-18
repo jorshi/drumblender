@@ -11,7 +11,7 @@ from pytorch_lightning.cli import LightningCLI
 
 import drumblender.utils.data as data_utils
 from drumblender.callbacks import SaveConfigCallbackWanb
-from drumblender.data import KickDataModule
+from drumblender.data import AudioDataModule
 
 
 def run_cli():
@@ -32,10 +32,8 @@ def dataset():
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument(
-        "--config",
-        "-c",
+        "config",
         type=str,
-        default=None,
         help="Path to a config file with arguments.",
     ),
     parser.add_argument(
@@ -69,7 +67,7 @@ def dataset():
     # LightningCLI uses. ArgumentParser requires us to add a root node
     # to the config file -- so we do that here.
     datamodule_parser = ArgumentParser()
-    datamodule_parser.add_subclass_arguments(KickDataModule, "datamodule")
+    datamodule_parser.add_subclass_arguments(AudioDataModule, "datamodule")
     if args.config is not None:
         with open(args.config, "r") as f:
             config = yaml.safe_load(f)
@@ -78,9 +76,6 @@ def dataset():
             datamodule = datamodule_parser.instantiate_classes(
                 datamodule_args
             ).datamodule
-    else:
-        # If no config file is specified, use the default datamodule
-        datamodule = KickDataModule()
 
     if args.archive is not None:
         datamodule.archive_dataset(args.archive)

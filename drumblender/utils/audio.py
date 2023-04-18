@@ -52,7 +52,8 @@ def preprocess_audio_file(
         )(waveform)
 
     # Remove silent samples from the beginning of the waveform
-    waveform = cut_start_silence(waveform, threshold_db=silence_threshold_db)
+    if remove_start_silence:
+        waveform = cut_start_silence(waveform, threshold_db=silence_threshold_db)
 
     # Truncate or pad the waveform to the desired number of samples
     if num_samples is not None and waveform.shape[1] != num_samples:
@@ -88,15 +89,14 @@ def generate_sine_wave(
 def modal_synth(
     freqs: torch.Tensor,
     amps: torch.Tensor,
-    sample_rate: int,
     num_samples: int,
 ) -> torch.Tensor:
     """
     Synthesizes a modal signal from a set of frequencies, phases, and amplitudes.
 
     Args:
-        freqs: A 3D tensor of frequencies in Hz of shape (batch_size, num_modes,
-            num_frames)
+        freqs: A 3D tensor of frequencies in angular frequency of shape
+            (batch_size, num_modes, num_frames)
         amps: A 3D tensor of amplitudes of shape (batch_size, num_modes, num_frames)
         sample_rate: Sample rate of the output signal
         num_samples: Number of samples in the output signal
@@ -104,11 +104,8 @@ def modal_synth(
     (batch_size, num_modes, num_frames) = freqs.shape
     assert freqs.shape == amps.shape
 
-    # Convert frequencies to angular frequencies
-    w = 2 * torch.pi * freqs / sample_rate
-
     # Interpolate the frequencies and amplitudes
-    w = torch.nn.functional.interpolate(w, size=num_samples, mode="linear")
+    w = torch.nn.functional.interpolate(freqs, size=num_samples, mode="linear")
     a = torch.nn.functional.interpolate(amps, size=num_samples, mode="linear")
 
     a = rearrange(a, "b m n -> (b m) n")

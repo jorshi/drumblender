@@ -35,17 +35,22 @@ To download a preprocessed dataset from a config file you can use the following
 command. **Note requires R2 access, see below**:
 
 ```bash
-$ drumblender-dataset -c cfg/data/kick_modal_small.yml
+$ drumblender-dataset cfg/data/singles/kick_single_ludwig.yaml
 ```
 
 This will download the preprocessed archive and extract it to the appropiate directory.
 
 To preprocess a dataset from raw audio files (make sure to delete pre-processed files
-first). Depending on the preprocessing requirements it may require additional
-packages.
+first).
 
 ```bash
-$ drumblender-dataset -c cfg/data/kick_modal_small.yml --preprocess
+$ drumblender-dataset cfg/data/singles/kick_single_ludwig.yaml --preprocess
+```
+
+For modal extraction nnAudio is required. Install using:
+
+```bash
+$ pip install ".[modal]"
 ```
 
 ### Cloudflare R2 Access
