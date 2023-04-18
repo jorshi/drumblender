@@ -544,7 +544,7 @@ def test_modal_dataset_preprocess_save_audio(fakefs, mocker):
         save_modal_audio=True,
     )
     mocked_synth = mocker.patch(
-        f"{TESTED_MODULE}.audio_utils.modal_synth",
+        f"{TESTED_MODULE}.modal_synth",
         return_value=torch.rand(1, data.num_samples),
     )
     mocked_save = mocker.patch(f"{TESTED_MODULE}.torchaudio.save")
