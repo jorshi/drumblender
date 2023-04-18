@@ -10,6 +10,7 @@ from typing import Union
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
+from einops import rearrange
 
 
 class DrumBlender(pl.LightningModule):
@@ -90,13 +91,20 @@ class DrumBlender(pl.LightningModule):
         # Synthesis
         y_hat = self.modal_synth(modal_params, original.shape[-1])
 
-        if self.transient_synth is not None:
-            y_hat = self.transient_synth(y_hat, transient_params)
-
         if self.noise_synth is not None:
             assert noise_params is not None, "Noise params must be provided"
             noise = self.noise_synth(noise_params, original.shape[-1])
+            noise = rearrange(noise, "b n -> b () n")
             y_hat = y_hat + noise
+
+        if self.transient_synth is not None:
+            y_hat = self.transient_synth(y_hat, transient_params)
+
+        # if self.noise_synth is not None:
+        #     assert noise_params is not None, "Noise params must be provided"
+        #     noise = self.noise_synth(noise_params, original.shape[-1])
+        #     noise = rearrange(noise, "b n -> b () n")
+        #     y_hat = y_hat + noise
 
         return y_hat
 

@@ -47,3 +47,13 @@ class ModalAmpParameters(DummyParameterEncoder):
         params[1] = params[1] * amp_mod
 
         return torch.stack(params, dim=1)
+
+
+class NoiseParameters(torch.nn.Module):
+    def __init__(self, param_shape: Union[Tuple, torch.Size]):
+        super().__init__()
+        p = torch.randn(param_shape) * 0.002
+        self.params = torch.nn.Parameter(p)
+
+    def forward(self, x: torch.tensor, params: Optional[torch.tensor] = None):
+        return self.params
