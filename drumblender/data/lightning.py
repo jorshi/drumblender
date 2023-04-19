@@ -20,6 +20,7 @@ import drumblender.utils.audio as audio_utils
 import drumblender.utils.data as data_utils
 from drumblender.data.audio import AudioDataset
 from drumblender.data.audio import AudioPairDataset
+from drumblender.synths import modal_synth
 from drumblender.utils.modal_analysis import CQTModalAnalysis
 
 
@@ -380,7 +381,7 @@ class ModalDataModule(AudioDataModule):
 
             # Save the modal audio
             if self.save_modal_audio:
-                modal_audio = audio_utils.modal_synth(
+                modal_audio = modal_synth(
                     modal_freqs,
                     modal_amps,
                     self.num_samples,

@@ -1,3 +1,4 @@
+from drumblender.synths.modal import modal_synth
 from drumblender.synths.modal import ModalSynth
 from drumblender.synths.modal import ModalSynthFreqs
 from drumblender.synths.noise import NoiseGenerator
@@ -8,9 +9,10 @@ from drumblender.synths.transient import WaveletTransform
 
 __all__ = [
     "idwt_functional",
-    "NoiseGenerator",
+    "modal_synth",
     "ModalSynth",
     "ModalSynthFreqs",
+    "NoiseGenerator",
     "TransientTCN",
     "WaveletConvOLA",
     "WaveletTransform",

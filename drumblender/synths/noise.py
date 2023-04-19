@@ -44,6 +44,10 @@ class NoiseGenerator(nn.Module):
             is a very narrow filter. We breadth the bandwidth of the filter
             by multiplying the IR with a Hann window. Then we convolve the IR
             with the noise source.
+
+        Returns:
+            Sequence of IR filters of size target_size.
+                Shape: [nb, frame_len, target_size]
         """
         # Cast tensor as if it was complex adding a zeroed imaginary part
         # with torch stack.
@@ -74,7 +78,7 @@ class NoiseGenerator(nn.Module):
         Overlaps and adds a filtered noise sequence.
 
         Args:
-            noise_unfolded (torch.Tensor): format [nb,frame_len,num_bands]
+            noise_unfolded (torch.Tensor): format [nb,frame_len,window_length]
 
         Returns:
             noise signals with format [b,n]
