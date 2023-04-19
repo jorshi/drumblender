@@ -2,6 +2,10 @@
 from torch import nn
 
 
+def _get_activation(activation: str):
+    return getattr(nn, activation)()
+
+
 class MLP(nn.Module):
     """A simple multi-layer perceptron model.
 
@@ -21,23 +25,17 @@ class MLP(nn.Module):
         hidden_size: int,
         output_size: int,
         hidden_layers: int,
+        activation: str,
     ):
         super().__init__()
 
-        layers = [nn.Linear(input_size, hidden_size), nn.ReLU()]
+        layers = [nn.Linear(input_size, hidden_size), _get_activation(activation)]
         for _ in range(hidden_layers):
-            layers.extend([nn.Linear(hidden_size, hidden_size), nn.ReLU()])
+            layers.extend(
+                [nn.Linear(hidden_size, hidden_size), _get_activation(activation)]
+            )
         layers.append(nn.Linear(hidden_size, output_size))
-
         self.model = nn.Sequential(*layers)
 
     def forward(self, x):
-        """
-
-        Args:
-          x:
-
-        Returns:
-
-        """
         return self.model(x)

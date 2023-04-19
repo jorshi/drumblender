@@ -11,6 +11,7 @@ def mlp():
         hidden_size=10,
         output_size=1,
         hidden_layers=2,
+        activation="ReLU",
     )
 
 
