@@ -9,6 +9,7 @@ model:
     noise_synth: synths/noise.yaml
     noise_autoencoder: models/encoder/noise_mlp_soundstream.yaml
     loss_fn: loss/mss.yaml
+    transient_parallel: true
 optimizer:
   class_path: torch.optim.Adam
   init_args:

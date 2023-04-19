@@ -100,7 +100,13 @@ class DrumBlender(pl.LightningModule):
             y_hat = y_hat + noise
 
         if self.transient_synth is not None:
-            y_hat = self.transient_synth(y_hat, transient_params)
+            transient = self.transient_synth(y_hat, transient_params)
+
+        # Transient can be added in parallel or in series
+        if self.transient_parallel:
+            y_hat = y_hat + transient
+        else:
+            y_hat = transient
 
         return y_hat
 
