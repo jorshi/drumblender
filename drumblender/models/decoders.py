@@ -106,6 +106,8 @@ class SoundStreamDecoder(torch.nn.Module):
         self.transpose_output = transpose_output
 
     def forward(self, x: torch.tensor) -> torch.tensor:
+        if x.ndim == 2:
+            x = x[..., None]
         x = self.net(x)
         if self.transpose_output:
             x = rearrange(x, "b c t -> b t c")

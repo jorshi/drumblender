@@ -82,7 +82,7 @@ class DrumBlender(pl.LightningModule):
 
         noise_params = None
         if self.noise_autoencoder is not None:
-            noise_params = self.noise_autoencoder(embedding)
+            noise_params, _ = self.noise_autoencoder(embedding)
 
         transient_params = None
         if self.transient_autoencoder is not None:
