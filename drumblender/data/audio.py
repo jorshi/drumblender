@@ -324,6 +324,7 @@ class AudioWithParametersDataset(AudioDataset):
         sample_rate: int,
         num_samples: int,
         parameter_key: str,
+        expected_num_modes: Optional[int] = None,
         **kwargs,
     ):
         super().__init__(
@@ -334,9 +335,25 @@ class AudioWithParametersDataset(AudioDataset):
             **kwargs,
         )
         self.parameter_key = parameter_key
+        self.expected_num_modes = expected_num_modes
 
     def __getitem__(self, idx):
         (waveform_a,) = super().__getitem__(idx)
         feature_file = self.metadata[self.file_list[idx]][self.parameter_key]
         feature = torch.load(self.data_dir.joinpath(feature_file))
+
+        # Pad with zeros if the number of modes is less than expected
+        if (
+            self.expected_num_modes is not None
+            and feature.shape[1] != self.expected_num_modes
+        ):
+            null_features = torch.zeros(
+                (
+                    feature.shape[0],
+                    self.expected_num_modes - feature.shape[1],
+                    feature.shape[2],
+                )
+            )
+            feature = torch.cat((feature, null_features), dim=1)
+
         return waveform_a, feature
