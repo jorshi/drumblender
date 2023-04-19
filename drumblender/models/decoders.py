@@ -105,6 +105,18 @@ class SoundStreamDecoder(torch.nn.Module):
         self.net = torch.nn.Sequential(*self.net)
         self.transpose_output = transpose_output
 
+        self.apply(self._init_weights)
+
+    def _init_weights(self, m):
+        if isinstance(m, torch.nn.Conv1d):
+            torch.nn.init.normal_(m.weight, 0, 0.002)
+            if m.bias is not None:
+                torch.nn.init.zeros_(m.bias)
+        elif isinstance(m, torch.nn.ConvTranspose1d):
+            torch.nn.init.normal_(m.weight, 0, 0.002)
+            if m.bias is not None:
+                torch.nn.init.zeros_(m.bias)
+
     def forward(self, x: torch.tensor) -> torch.tensor:
         if x.ndim == 2:
             x = x[..., None]
