@@ -26,6 +26,7 @@ class MLP(nn.Module):
         output_size: int,
         hidden_layers: int,
         activation: str,
+        output_activation: str = None,
     ):
         super().__init__()
 
@@ -35,6 +36,9 @@ class MLP(nn.Module):
                 [nn.Linear(hidden_size, hidden_size), _get_activation(activation)]
             )
         layers.append(nn.Linear(hidden_size, output_size))
+        if output_activation:
+            layers.append(_get_activation(output_activation))
+
         self.model = nn.Sequential(*layers)
 
     def forward(self, x):

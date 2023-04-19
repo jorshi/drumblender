@@ -78,7 +78,7 @@ class DrumBlender(pl.LightningModule):
         # Modal parameter autoencoder
         modal_params = params
         if self.modal_autoencoder is not None:
-            modal_params = self.modal_autoencoder(params, embedding)
+            modal_params, _ = self.modal_autoencoder(embedding, params)
 
         noise_params = None
         if self.noise_autoencoder is not None:

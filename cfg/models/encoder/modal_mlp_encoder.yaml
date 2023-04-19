@@ -1,0 +1,4 @@
+class_path: drumblender.models.ModalAutoEncoder
+init_args:
+  autoencoder: mlp_encoder.yaml
+  mod_dim: 2

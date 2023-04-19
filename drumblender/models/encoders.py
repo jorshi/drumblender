@@ -32,7 +32,9 @@ class ModalAmpParameters(DummyParameterEncoder):
         super().__init__(torch.Size([num_modes]))
 
     def forward(
-        self, params: Optional[torch.tensor], embedding: Optional[torch.tensor] = None
+        self,
+        embedding: Optional[torch.tensor] = None,
+        params: Optional[torch.tensor] = None,
     ):
         assert params.ndim == 4
         batch_size, num_params, num_modes, num_steps = params.shape
@@ -75,22 +77,38 @@ class AutoEncoder(torch.nn.Module):
         encoder: torch.nn.Module,
         decoder: torch.nn.Module,
         latent_size: int,
-        return_latent: bool = False,
     ):
         super().__init__()
         self.encoder = encoder
         self.decoder = decoder
         self.latent_size = latent_size
-        self.return_latent = return_latent
 
-    def forward(
-        self, x: torch.tensor, params: Optional[torch.tensor] = None
-    ) -> Union[torch.tensor, Tuple[torch.tensor, torch.tensor]]:
+    def forward(self, x: torch.tensor) -> Tuple[torch.tensor, ...]:
         z = self.encoder(x)
         x = self.decoder(z)
 
         assert z.shape[-1] == self.latent_size, "Latent size mismatch"
-        if self.return_latent:
-            return x, z
+        return x, z
 
-        return x
+
+class ModalAutoEncoder(torch.nn.Module):
+    def __init__(self, autoencoder: torch.nn.Module, mod_dim: int) -> None:
+        super().__init__()
+        self.autoencoder = autoencoder
+        self.mod_dim = mod_dim
+
+    def forward(self, x: torch.tensor, params: torch.tensor) -> torch.tensor:
+        assert params.ndim == 4
+        batch_size, num_params, num_modes, num_steps = params.shape
+        assert num_params == 3
+
+        params = torch.chunk(params, 3, dim=1)
+        params = [p.squeeze(1) for p in params]
+
+        x, z = self.autoencoder(x)
+
+        # Modulate the amplitude of the modal parameters
+        params[self.mod_dim] = params[self.mod_dim] * x[..., None]
+        params = torch.stack(params, dim=1)
+
+        return params, z
