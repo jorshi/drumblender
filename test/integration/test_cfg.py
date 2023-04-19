@@ -35,6 +35,10 @@ TEST_TYPES = dict(
         pathname="cfg/optimizer/**/*.yaml",
         recursive=True,
     ),
+    synth_cfg=dict(
+        pathname="cfg/synths/**/*.yaml",
+        recursive=True,
+    ),
     experiment_cfg=dict(
         pathname="cfg/*.yaml",
         recursive=False,
