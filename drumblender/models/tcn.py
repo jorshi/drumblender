@@ -157,6 +157,7 @@ class TCN(nn.Module):
         hidden_channels: int,
         out_channels: int,
         dilation_base: int = 2,
+        dilation_blocks: Optional[int] = None,
         num_layers: int = 8,
         kernel_size: int = 3,
         causal: bool = True,
@@ -174,13 +175,15 @@ class TCN(nn.Module):
         self.out_projection = nn.Conv1d(hidden_channels, out_channels, 1)
 
         net = []
+        dilation_blocks = dilation_blocks if dilation_blocks is not None else num_layers
         for n in range(num_layers):
+            dilation = dilation_base ** (n % dilation_blocks)
             net.append(
                 _DilatedResidualBlock(
                     hidden_channels,
                     hidden_channels,
                     kernel_size,
-                    dilation_base**n,
+                    dilation,
                     causal=causal,
                     norm=norm,
                     activation=activation,

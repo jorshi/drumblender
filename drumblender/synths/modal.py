@@ -5,6 +5,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from einops import rearrange
 
+import drumblender.utils.audio as audio_utils
+
 
 class ModalSynthFreqs(nn.Module):
     def __init__(
@@ -106,6 +108,29 @@ class ModalSynthFreqs(nn.Module):
         y = rearrange(y, "(b m) n -> b m n", m=num_modes)
         y = torch.sum(y, dim=1)
 
+        return y
+
+
+class ModalSynth(torch.nn.Module):
+    """
+    Modal synthesis with given frequencies, amplitudes, and optional phase
+    Users linear interpolation to generate the frequency envelope.
+    """
+
+    def forward(self, params: torch.Tensor, num_samples: int):
+        """
+        params: [nb,num_params,num_modes,num_frames], expected parameters
+                are: frequency, amplitude, and phase (optional)
+        num_samples: number of samples to generate
+        """
+        assert params.ndim == 4, "Expected 4D tensor"
+        assert params.size()[1] in [2, 3], "Expected 2 or 3 parameters"
+
+        params = torch.chunk(params, params.size()[1], dim=1)
+        params = [p.squeeze(1) for p in params]
+
+        y = audio_utils.modal_synth(params[0], params[1], num_samples)
+        y = rearrange(y, "b n -> b 1 n")
         return y
 
 

@@ -9,7 +9,7 @@ from drumblender.callbacks import LogAudioCallback
 from drumblender.callbacks import SaveConfigCallbackWanb
 
 
-class FakeLogger:
+class FakeLogger(pl.loggers.WandbLogger):
     def __init__(self, stub):
         self.stub = stub
 

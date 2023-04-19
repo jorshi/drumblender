@@ -1,3 +1,5 @@
+from typing import Optional
+
 import torch
 import torch.nn as nn
 from einops import rearrange
@@ -82,11 +84,12 @@ class NoiseGenerator(nn.Module):
             noise signals with format [b,n]
         """
         # Window each frame
-        window = torch.hann_window(self.window_size)
+        window = torch.hann_window(self.window_size, device=noise_unfolded.device)
         noise_unfolded = noise_unfolded * window
 
         # Compute final sample size
         n = (noise_unfolded.size()[1] - 1) * self.hop_size
+
         # Stitch the windows back together.
         # Expects tensors in format [batch, C*kernel_size, L ].
         # C = 1 for our signal.
@@ -113,7 +116,7 @@ class NoiseGenerator(nn.Module):
 
         return output
 
-    def forward(self, noise_bands: torch.Tensor):
+    def forward(self, noise_bands: torch.Tensor, target_lenght: Optional[int] = None):
         """
         Args:
             noise_bands (torch.Tensor): A tensor with predicted filtered
@@ -135,5 +138,8 @@ class NoiseGenerator(nn.Module):
 
         noise = self.fft_convolve(noise, impulse).contiguous()
         noise = self.overlap_and_add(noise)
+
+        if target_lenght is not None:
+            noise = noise[:, :target_lenght]
 
         return noise

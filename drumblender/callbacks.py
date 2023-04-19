@@ -8,8 +8,10 @@ from typing import Literal
 
 import pytorch_lightning as pl
 import torch
+import torchaudio
 from pytorch_lightning.callbacks import Callback
 from pytorch_lightning.cli import SaveConfigCallback
+from pytorch_lightning.loggers import TensorBoardLogger
 from pytorch_lightning.loggers import WandbLogger
 from wandb import Audio
 
@@ -205,15 +207,25 @@ class LogAudioCallback(Callback):
         signals = reduce(
             lambda x, y: x + y, zip(targets, reconstructions)  # type: ignore
         )
-        audio_signal = torch.hstack(signals).squeeze().cpu().numpy()
+        audio_signal = torch.hstack(signals).cpu()
 
-        audio = Audio(
-            audio_signal,
-            caption=f"{split}/audio",
-            sample_rate=self.save_audio_sr,
-        )
-        if self.model.logger is not None:
-            self.model.logger.experiment.log({f"{split}/audio": audio})
+        if isinstance(self.model.logger, WandbLogger):
+            audio_signal = audio_signal.squeeze().numpy()
+            audio = Audio(
+                audio_signal,
+                caption=f"{split}/audio",
+                sample_rate=self.save_audio_sr,
+            )
+            if self.model.logger is not None:
+                self.model.logger.experiment.log({f"{split}/audio": audio})
+        elif isinstance(self.model.logger, TensorBoardLogger):
+            outdir = Path(self.model.logger.log_dir).joinpath("audio")
+            outdir.mkdir(parents=True, exist_ok=True)
+            torchaudio.save(
+                str(outdir.joinpath(f"{split}.wav")),
+                audio_signal,
+                self.save_audio_sr,
+            )
 
 
 class CleanWandbCacheCallback(pl.Callback):
