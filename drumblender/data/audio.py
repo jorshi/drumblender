@@ -336,7 +336,7 @@ class AudioWithParametersDataset(AudioDataset):
         self.parameter_key = parameter_key
 
     def __getitem__(self, idx):
-        waveform_a = super().__getitem__(idx)
+        (waveform_a,) = super().__getitem__(idx)
         feature_file = self.metadata[self.file_list[idx]][self.parameter_key]
         feature = torch.load(self.data_dir.joinpath(feature_file))
         return waveform_a, feature
