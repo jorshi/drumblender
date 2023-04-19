@@ -29,7 +29,7 @@ trainer:
   logger:
     class_path: pytorch_lightning.loggers.WandbLogger
     init_args:
-      name: autoencoder_eats
+      name: eats_ae
       project: drumblender
       save_dir: logs
       log_model: true
@@ -55,11 +55,11 @@ trainer:
       init_args:
         every_n_epochs: 2
         max_size_in_gb: 2
-    # - class_path: pytorch_lightning.callbacks.BatchSizeFinder
-    #   init_args:
-    #     mode: binsearch
-    #     steps_per_trial: 10
-    #     init_val: 2
-    #     max_trials: 25
-    #     batch_arg_name: batch_size
+    - class_path: pytorch_lightning.callbacks.BatchSizeFinder
+      init_args:
+        mode: binsearch
+        steps_per_trial: 10
+        init_val: 2
+        max_trials: 25
+        batch_arg_name: batch_size
 seed_everything: 396818285

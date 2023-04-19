@@ -13,7 +13,6 @@ from pytorch_lightning.callbacks import Callback
 from pytorch_lightning.cli import SaveConfigCallback
 from pytorch_lightning.loggers import TensorBoardLogger
 from pytorch_lightning.loggers import WandbLogger
-
 from wandb import Audio
 
 
@@ -202,8 +201,8 @@ class LogAudioCallback(Callback):
         ):
             return
 
-        targets = torch.cat(self.saved_targets[split][0:2], dim=0)
-        reconstructions = torch.cat(self.saved_reconstructions[split][0:2], dim=0)
+        targets = torch.cat(self.saved_targets[split], dim=0)
+        reconstructions = torch.cat(self.saved_reconstructions[split], dim=0)
 
         signals = reduce(
             lambda x, y: x + y, zip(targets, reconstructions)  # type: ignore
