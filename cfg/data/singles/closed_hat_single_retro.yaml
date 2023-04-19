@@ -2,7 +2,7 @@ class_path: drumblender.data.ModalDataModule
 init_args:
   batch_size: 1
   num_workers: 0
-  dataset_class: drumblender.data.AudioPairWithFeatureDataset
+  dataset_class: drumblender.data.AudioWithParametersDataset
   url: https://d5d740b2d880827ae0c8f465bf180715.r2.cloudflarestorage.com
   archive: drumblender-closed-hihat-retro-single-v0.tar.gz
   bucket: drum-dataset
@@ -21,4 +21,4 @@ init_args:
   diff_threshold: 5.0
   dataset_kwargs:
     seed: 42
-    feature_key: feature_file
+    parameter_key: feature_file

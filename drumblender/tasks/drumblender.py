@@ -103,10 +103,10 @@ class DrumBlender(pl.LightningModule):
         return y_hat
 
     def _do_step(self, batch: Tuple[torch.Tensor, ...]):
-        if len(batch) == 3:
-            original, _, params = batch
+        if len(batch) == 2:
+            original, params = batch
         else:
-            raise ValueError("Expected batch to be a tuple of length 3")
+            raise ValueError("Expected batch to be a tuple of length 2")
 
         y_hat = self(original, params)
         loss = self.loss_fn(y_hat, original)
