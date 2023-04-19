@@ -55,7 +55,7 @@ trainer:
         on_test: true
         save_audio_sr: 48000
         n_batches: 1
-    - class_path: kick2kick.callbacks.CleanWandbCacheCallback
+    - class_path: drumblender.callbacks.CleanWandbCacheCallback
       init_args:
         every_n_epochs: 2
         max_size_in_gb: 2

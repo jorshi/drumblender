@@ -77,7 +77,10 @@ def test_drumblender_forwards_all(mocker):
     noise_encoder = FakeModule(expected_noise_encoder_output)
     noise_encoder_spy = mocker.spy(noise_encoder, "forward")
 
-    expected_transient_encoder_output = torch.rand(batch_size, embedding_size)
+    expected_transient_encoder_output = (
+        torch.rand(batch_size, embedding_size),
+        torch.rand(batch_size, latent_size),
+    )
     transient_encoder = FakeModule(expected_transient_encoder_output)
     transient_encoder_spy = mocker.spy(transient_encoder, "forward")
 
@@ -124,7 +127,7 @@ def test_drumblender_forwards_all(mocker):
     )
     torch.testing.assert_close(transient_spy.call_args_list[0][0][0], transient_input)
     torch.testing.assert_close(
-        transient_spy.call_args_list[0][0][1], expected_transient_encoder_output
+        transient_spy.call_args_list[0][0][1], expected_transient_encoder_output[0]
     )
 
     assert torch.all(y == expected_transient_output)
