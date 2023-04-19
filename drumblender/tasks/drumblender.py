@@ -70,7 +70,7 @@ class DrumBlender(pl.LightningModule):
         original: torch.Tensor,
         params: torch.Tensor,
     ):
-        # Main embedding
+        # Main embeddings
         embedding = None
         if self.encoder is not None:
             embedding = self.encoder(original)
