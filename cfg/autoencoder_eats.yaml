@@ -61,3 +61,4 @@ trainer:
     #     max_trials: 25
     #     batch_arg_name: batch_size
 seed_everything: 396818285
+float32_matmul_precision: medium

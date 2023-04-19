@@ -49,6 +49,7 @@ class DrumBlender(pl.LightningModule):
         noise_autoencoder: Optional[nn.Module] = None,
         transient_autoencoder: Optional[nn.Module] = None,
         encoder: Optional[nn.Module] = None,
+        transient_parallel: bool = False,
         float32_matmul_precision: Literal["medium", "high", "highest", None] = None,
     ):
         super().__init__()
@@ -61,6 +62,7 @@ class DrumBlender(pl.LightningModule):
         self.noise_autoencoder = noise_autoencoder
         self.transient_autoencoder = transient_autoencoder
         self.encoder = encoder
+        self.transient_parallel = transient_parallel
 
         if float32_matmul_precision is not None:
             torch.set_float32_matmul_precision(float32_matmul_precision)
