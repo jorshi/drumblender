@@ -11,6 +11,7 @@ from torch.utils.data import DataLoader
 
 import drumblender.utils.data as data_utils
 from drumblender.data import AudioDataModule
+from drumblender.data import AudioWithParametersDataset
 from drumblender.data import ModalDataModule
 from drumblender.utils.modal_analysis import CQTModalAnalysis
 
@@ -306,7 +307,11 @@ def test_audio_datamodule_train_data(kick_datamodule, mocker):
     )
 
     batch = next(iter(train_loader))
-    assert batch.shape == (kick_datamodule.batch_size, 1, kick_datamodule.num_samples)
+    assert batch[0].shape == (
+        kick_datamodule.batch_size,
+        1,
+        kick_datamodule.num_samples,
+    )
 
 
 def test_modal_datamodule_init():
@@ -555,20 +560,19 @@ def test_modal_dataset_preprocess_save_audio(fakefs, mocker):
     assert mocked_save.call_count == 100
 
 
-@pytest.fixture
-def kick_modal_datamodule(fs, mocker):
+def kick_modal_datamodule(fs, mocker, **kwargs):
     # Mock the dataset directory and metadata file
-    data = ModalDataModule()
+    data = ModalDataModule(**kwargs)
     fs.create_dir(data.data_dir)
     fs.create_file(Path(data.data_dir).joinpath(data.meta_file))
     mocker.patch(
         "drumblender.data.audio.json.load", side_effect=processed_modal_metadata
     )
-    return ModalDataModule()
+    return ModalDataModule(**kwargs)
 
 
-def test_modal_datamodule_setup_train(kick_modal_datamodule):
-    dm = kick_modal_datamodule
+def test_modal_datamodule_setup_train(fs, mocker):
+    dm = kick_modal_datamodule(fs, mocker)
     dm.setup("fit")
     assert len(dm.train_dataset) == 80
     assert len(dm.val_dataset) == 10
@@ -576,8 +580,8 @@ def test_modal_datamodule_setup_train(kick_modal_datamodule):
         dm.test_dataset
 
 
-def test_modal_datamodule_setup_val(kick_modal_datamodule):
-    dm = kick_modal_datamodule
+def test_modal_datamodule_setup_val(fs, mocker):
+    dm = kick_modal_datamodule(fs, mocker)
     dm.setup("validate")
     assert len(dm.val_dataset) == 10
     with pytest.raises(AttributeError):
@@ -586,8 +590,8 @@ def test_modal_datamodule_setup_val(kick_modal_datamodule):
         dm.train_dataset
 
 
-def test_modal_datamodule_setup_test(kick_modal_datamodule):
-    dm = kick_modal_datamodule
+def test_modal_datamodule_setup_test(fs, mocker):
+    dm = kick_modal_datamodule(fs, mocker)
     dm.setup("test")
     assert len(dm.test_dataset) == 10
     with pytest.raises(AttributeError):
@@ -596,14 +600,14 @@ def test_modal_datamodule_setup_test(kick_modal_datamodule):
         dm.train_dataset
 
 
-def test_modal_datamodule_train_data(kick_modal_datamodule, mocker):
+def test_modal_datamodule_train_data(fs, mocker):
     # Test that the train data loader works and returns the correct shape
-    dm = kick_modal_datamodule
+    dm = kick_modal_datamodule(fs, mocker)
     dm.setup("fit")
     train_loader = dm.train_dataloader()
     assert isinstance(train_loader, DataLoader)
 
-    mocker = mocker.patch(
+    _ = mocker.patch(
         f"{TESTED_MODULE}.torchaudio.load",
         return_value=(
             torch.rand(1, dm.num_samples),
@@ -611,6 +615,41 @@ def test_modal_datamodule_train_data(kick_modal_datamodule, mocker):
         ),
     )
 
-    audio_batch_a, audio_batch_b = next(iter(train_loader))
-    assert audio_batch_a.shape == (dm.batch_size, 1, dm.num_samples)
-    assert audio_batch_b.shape == (dm.batch_size, 1, dm.num_samples)
+    (audio_batch,) = next(iter(train_loader))
+    assert audio_batch.shape == (dm.batch_size, 1, dm.num_samples)
+
+
+def test_modal_datamodule_audio_param_dataset_train(fs, mocker):
+    dm = kick_modal_datamodule(
+        fs,
+        mocker,
+        batch_size=8,
+        dataset_class=AudioWithParametersDataset,
+        dataset_kwargs={"parameter_key": "features"},
+    )
+    dm.setup("fit")
+    train_loader = dm.train_dataloader()
+    assert isinstance(train_loader, DataLoader)
+
+    # Mock loading audio
+    mock_audio_load = mocker.patch(
+        f"{TESTED_MODULE}.torchaudio.load",
+        return_value=(
+            torch.rand(1, dm.num_samples),
+            dm.sample_rate,
+        ),
+    )
+
+    # Mock loading parameters
+    mock_feature_load = mocker.patch(
+        f"{TESTED_MODULE}.torch.load",
+        return_value=torch.rand(3, 4, 10),
+    )
+
+    audio_batch, parameters = next(iter(train_loader))
+
+    assert audio_batch.shape == (dm.batch_size, 1, dm.num_samples)
+    assert parameters.shape == (dm.batch_size, 3, 4, 10)
+
+    assert mock_audio_load.call_count == dm.batch_size
+    assert mock_feature_load.call_count == dm.batch_size

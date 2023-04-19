@@ -98,9 +98,67 @@ def test_audio_dataset_getitem(fs, mocker):
         f"{TESTED_MODULE}.torchaudio.load",
         return_value=(test_audio, TEST_SAMPLE_RATE),
     )
-    audio = dataset[0]
+    (audio,) = dataset[0]
     assert audio.shape == (1, TEST_NUM_SAMPLES)
     assert torch.all(audio == test_audio)
+
+
+@pytest.fixture
+def sample_pack_split_metadata():
+    metadata = {}
+    for i in range(100):
+        pack = "a"
+        if i >= 80:
+            pack = "b"
+        if i >= 90:
+            pack = "c"
+
+        metadata[i] = {
+            "filename": i,
+            "sample_pack_key": pack,
+            "type": "electro",
+        }
+
+    return metadata
+
+
+def test_audio_dataset_sample_pack_split(fs, mocker, sample_pack_split_metadata):
+    dataset = audio_dataset(fs, mocker, split_strategy="sample_pack")
+    dataset.metadata = sample_pack_split_metadata
+
+    dataset._sample_pack_split(split="train", test_size=0.1, val_size=0.1)
+    assert len(dataset.file_list) == 80
+    assert max(dataset.file_list) == 79
+
+    # Because of the random split, split can be either 80-89 or 90-99
+    dataset._sample_pack_split(split="test", test_size=0.1, val_size=0.1)
+    assert len(dataset.file_list) == 10
+    if min(dataset.file_list) == 80:
+        assert max(dataset.file_list) == 89
+    else:
+        assert min(dataset.file_list) == 90 and max(dataset.file_list) == 99
+
+    dataset._sample_pack_split(split="val", test_size=0.1, val_size=0.1)
+    assert len(dataset.file_list) == 10
+    if min(dataset.file_list) == 80:
+        assert max(dataset.file_list) == 89
+    else:
+        assert min(dataset.file_list) == 90 and max(dataset.file_list) == 99
+
+
+def test_audio_dataset_sample_pack_split_reproducible(
+    fs, mocker, sample_pack_split_metadata
+):
+    dataset = audio_dataset(fs, mocker, split_strategy="sample_pack")
+    dataset.metadata = sample_pack_split_metadata
+
+    dataset._sample_pack_split(split="test", test_size=0.1, val_size=0.1)
+    file_list_a = list(dataset.file_list)
+
+    dataset._sample_pack_split(split="test", test_size=0.1, val_size=0.1)
+    file_list_b = list(dataset.file_list)
+
+    assert file_list_a == file_list_b
 
 
 def test_audio_pair_with_feature_dataset(fs, monkeypatch):

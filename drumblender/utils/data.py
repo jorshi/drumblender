@@ -224,7 +224,9 @@ class R2ProgressPercentage:
             sys.stdout.flush()
 
 
-def get_files_from_folders(basedir: str, folders: List[str], pattern: str) -> List:
+def get_files_from_folders(
+    basedir: str, folders: Union[Dict, List[str]], pattern: str
+) -> List:
     """
     List all files in a list of folders.
 
@@ -233,8 +235,19 @@ def get_files_from_folders(basedir: str, folders: List[str], pattern: str) -> Li
         pattern (str): The pattern to search for. E.g. "*.wav"
     """
     file_list = []
-    for folder in folders:
-        file_list.extend(Path(basedir).joinpath(folder).rglob(pattern))
+
+    # If the folders are a dictionary, get the list of folders from the values
+    if isinstance(folders, dict):
+        item_folders = []
+        for _, val in folders.items():
+            item_folders.append(val["path"])
+
+        folder_files = get_files_from_folders(basedir, item_folders, pattern)
+        file_list.extend(folder_files)
+
+    elif isinstance(folders, list):
+        for folder in folders:
+            file_list.extend(Path(basedir).joinpath(folder).rglob(pattern))
 
     return file_list
 

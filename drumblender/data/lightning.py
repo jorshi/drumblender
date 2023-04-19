@@ -19,7 +19,6 @@ from tqdm import tqdm
 import drumblender.utils.audio as audio_utils
 import drumblender.utils.data as data_utils
 from drumblender.data.audio import AudioDataset
-from drumblender.data.audio import AudioPairDataset
 from drumblender.synths import modal_synth
 from drumblender.utils.modal_analysis import CQTModalAnalysis
 
@@ -278,9 +277,9 @@ class ModalDataModule(AudioDataModule):
 
     def __init__(
         self,
-        batch_size: int = 32,
+        batch_size: int = 8,
         num_workers: int = 0,
-        dataset_class: Type[AudioPairDataset] = AudioPairDataset,
+        dataset_class: Type[AudioDataset] = AudioDataset,
         dataset_kwargs: Optional[Dict] = None,
         url="https://d5d740b2d880827ae0c8f465bf180715.r2.cloudflarestorage.com",
         bucket="drum-dataset",
@@ -300,15 +299,6 @@ class ModalDataModule(AudioDataModule):
         diff_threshold=5.0,
         save_modal_audio=True,
     ):
-        # Set default values for the file_keys in the Dataset -- these are the filename
-        # keys in the metadata file that will be used to load the pairs of audio files
-        dataset_kwargs = dataset_kwargs or {}
-        if dataset_kwargs.get("file_key_a") is None:
-            dataset_kwargs["file_key_a"] = "filename"
-
-        if dataset_kwargs.get("file_key_b") is None:
-            dataset_kwargs["file_key_b"] = "filename_modal"
-
         super().__init__(
             batch_size=batch_size,
             num_workers=num_workers,
@@ -361,10 +351,17 @@ class ModalDataModule(AudioDataModule):
             diff_threshold=self.diff_threshold,
         )
 
+        keys_to_remove = []
         for key, item in tqdm(metadata.items()):
             audio_file = Path(self.data_dir).joinpath(item["filename"])
             waveform, _ = torchaudio.load(audio_file)
-            modal_freqs, modal_amps, modal_phases = modal(waveform)
+
+            try:
+                modal_freqs, modal_amps, modal_phases = modal(waveform)
+            except RuntimeError:
+                log.warning(f"Failed to extract modal features for {audio_file}")
+                keys_to_remove.append(key)
+                continue
 
             # Frequencies are returned in Hz, convert to angular
             modal_freqs = 2 * torch.pi * modal_freqs / self.sample_rate
@@ -398,6 +395,10 @@ class ModalDataModule(AudioDataModule):
 
             # Update the metadata
             metadata[key]["feature_file"] = str(modal_file.relative_to(self.data_dir))
+
+        # Remove any items that failed to extract modal features
+        for key in keys_to_remove:
+            metadata.pop(key)
 
         # Save the new metadata
         with open(Path(self.data_dir).joinpath(self.meta_file), "w") as f:

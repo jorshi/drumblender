@@ -5,9 +5,13 @@ import json
 import logging
 import os
 from pathlib import Path
+from typing import List
+from typing import Literal
 from typing import Optional
+from typing import Tuple
 from typing import Union
 
+import pandas as pd
 import torch
 import torchaudio
 from torch.utils.data import Dataset
@@ -42,6 +46,9 @@ class AudioDataset(Dataset):
         num_samples: int,
         split: Optional[str] = None,
         seed: int = 42,
+        split_strategy: Literal["sample_pack", "random"] = "random",
+        normalize: bool = False,
+        sample_types: Optional[List[str]] = None,
     ):
         super().__init__()
         self.data_dir = Path(data_dir)
@@ -49,6 +56,8 @@ class AudioDataset(Dataset):
         self.sample_rate = sample_rate
         self.num_samples = num_samples
         self.seed = seed
+        self.normalize = normalize
+        self.sample_types = sample_types
 
         # Confirm that preprocessed dataset exists
         if not self.data_dir.exists():
@@ -64,12 +73,19 @@ class AudioDataset(Dataset):
 
         # Split the dataset
         if split is not None:
-            self._split(split)
+            if split_strategy == "sample_pack":
+                self._sample_pack_split(split)
+            elif split_strategy == "random":
+                self._random_split(split)
+            else:
+                raise ValueError(
+                    "Invalid split strategy. Expected one of 'sample_pack' or 'random'."
+                )
 
     def __len__(self):
         return len(self.file_list)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx) -> Tuple[torch.Tensor]:
         audio_filename = self.metadata[self.file_list[idx]]["filename"]
         waveform, sample_rate = torchaudio.load(self.data_dir.joinpath(audio_filename))
 
@@ -77,19 +93,91 @@ class AudioDataset(Dataset):
         assert sample_rate == self.sample_rate, "Sample rate mismatch."
         assert waveform.shape == (1, self.num_samples), "Incorrect input audio shape."
 
-        return waveform
+        # Apply peak normalization
+        if self.normalize:
+            waveform = waveform / waveform.abs().max()
 
-    def _split(self, split: str):
+        return (waveform,)
+
+    def _sample_pack_split(
+        self, split: str, test_size: float = 0.1, val_size: float = 0.1
+    ):
         """
-        Split the dataset into train, validation, and test sets.
-
-        TODO: Do we need something more than a random split here?
-        i.e. balancing between acoustic vs. electronic kicks or
-        ensuring that samples from the same sample pack in the same split
+        Split the dataset into train, validation, and test sets. This creates splits
+        that are disjont with respect to sample packs and have same the proportion of
+        sample types. It performsn a greedy assignment of samples to splits, starting
+        with the test set, then the validation set, and finally the training set.
 
         Args:
             split: Split to return. Must be one of 'train', 'val', or 'test'.
         """
+        if split not in ["train", "val", "test"]:
+            raise ValueError("Invalid split. Must be one of 'train', 'val', or 'test'.")
+
+        data = pd.DataFrame.from_dict(self.metadata, orient="index")
+
+        # Count the number of samples in each type (e.g. electric, acoustic)
+        data_types = data.groupby("type").size().reset_index(name="counts")
+        log.info(f"Number of samples by type:\n {data_types}")
+
+        # Filter by sample types
+        if self.sample_types is not None:
+            data_types = data_types[data_types["type"].isin(self.sample_types)]
+            log.info(f"Filtering by sample types: {self.sample_types}")
+
+        for t in data_types.iterrows():
+            num_samples = t[1]["counts"]
+            sample_type = t[1]["type"]
+
+            # Group the samples by sample pack with counts and shuffle
+            sample_packs = (
+                data[data["type"] == sample_type]
+                .groupby("sample_pack_key")
+                .size()
+                .reset_index(name="counts")
+                .sample(frac=1, random_state=self.seed)
+            )
+
+            # Add a column for split
+            sample_packs["split"] = "train"
+
+            # Starting with the test set, greedily assign samples to splits -- if a
+            # sample pack has fewer samples than the number of samples needed for the
+            # split, assign all of the samples in the pack to the split.
+            for s, n in zip(("test", "val"), (test_size, val_size)):
+                split_samples = int(num_samples * n)
+                for i, row in sample_packs.iterrows():
+                    if row["counts"] <= split_samples and row["split"] == "train":
+                        split_samples -= row["counts"]
+                        sample_packs.loc[i, "split"] = s
+
+            # Assign the split to the samples in data
+            for i, row in sample_packs.iterrows():
+                data.loc[
+                    data["sample_pack_key"] == row["sample_pack_key"],
+                    "split",
+                ] = row["split"]
+
+        # Count the number of samples in each split, log as percentage of total
+        splits = data.groupby("split").size().reset_index(name="counts")
+        splits["percent"] = splits["counts"] / splits["counts"].sum()
+        log.info(f"Split counts:\n{splits}")
+
+        # Set the file list based on the split
+        self.file_list = data[data["split"] == split].index.tolist()
+
+    def _random_split(self, split: str):
+        """
+        Split the dataset into train, validation, and test sets.
+
+        Args:
+            split: Split to return. Must be one of 'train', 'val', or 'test'.
+        """
+        if self.sample_types is not None:
+            raise NotImplementedError(
+                "Cannot use sample types with random split. Use sample_pack split."
+            )
+
         if split not in ["train", "val", "test"]:
             raise ValueError("Invalid split. Must be one of 'train', 'val', or 'test'.")
 
@@ -214,3 +302,41 @@ class AudioPairWithFeatureDataset(AudioPairDataset):
         feature_file = self.metadata[self.file_list[idx]][self.feature_key]
         feature = torch.load(self.data_dir.joinpath(feature_file))
         return waveform_a, waveform_b, feature
+
+
+class AudioWithParametersDataset(AudioDataset):
+    """
+    Dataset of audio pairs with an additional parameter tensor
+
+    Args:
+        data_dir: Path to the directory containing the dataset.
+        meta_file: Name of the json metadata file.
+        sample_rate: Expected sample rate of the audio files.
+        num_samples: Expected number of samples in the audio files.
+        parameter_ky: Key in the metadata file for the feature file.
+        **kwargs: Additional arguments to pass to AudioPairDataset.
+    """
+
+    def __init__(
+        self,
+        data_dir: Union[str, Path],
+        meta_file: str,
+        sample_rate: int,
+        num_samples: int,
+        parameter_key: str,
+        **kwargs,
+    ):
+        super().__init__(
+            data_dir=data_dir,
+            meta_file=meta_file,
+            sample_rate=sample_rate,
+            num_samples=num_samples,
+            **kwargs,
+        )
+        self.parameter_key = parameter_key
+
+    def __getitem__(self, idx):
+        (waveform_a,) = super().__getitem__(idx)
+        feature_file = self.metadata[self.file_list[idx]][self.parameter_key]
+        feature = torch.load(self.data_dir.joinpath(feature_file))
+        return waveform_a, feature

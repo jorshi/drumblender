@@ -20,6 +20,7 @@ dependencies = [
     "python-dotenv",
     "PyWavelets",
     "soundfile",
+    "pandas",
 ]
 
 [project.scripts]
