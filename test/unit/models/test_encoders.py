@@ -27,7 +27,7 @@ def test_modal_amp_parameters_can_forward():
     # May receive a batch of modal parameters with a different number of modes
     model = ModalAmpParameters(num_modes + 10)
 
-    output = model(fake_modal_params)
+    output = model(None, fake_modal_params)
     assert output.shape == (batch_size, num_params, num_modes, num_steps)
 
 
@@ -54,7 +54,7 @@ def test_autoencoder_can_forward(mocker):
     model = AutoEncoder(fake_encoder, fake_decoder, latent_size=3)
 
     x = torch.zeros(10, 10)
-    output = model(x)
+    output, _ = model(x)
 
     torch.testing.assert_close(output, torch.ones(10, 10))
     encoder_spy.assert_called_once_with(x)
@@ -67,7 +67,7 @@ def test_autoencoder_can_forward_with_latent(mocker):
     fake_decoder = torch.nn.Linear(3, 10)
     decoder_spy = mocker.spy(fake_decoder, "forward")
 
-    model = AutoEncoder(fake_encoder, fake_decoder, latent_size=3, return_latent=True)
+    model = AutoEncoder(fake_encoder, fake_decoder, latent_size=3)
 
     x = torch.zeros(10, 10)
     output, latent = model(x)
