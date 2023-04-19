@@ -100,12 +100,6 @@ class DrumBlender(pl.LightningModule):
         if self.transient_synth is not None:
             y_hat = self.transient_synth(y_hat, transient_params)
 
-        # if self.noise_synth is not None:
-        #     assert noise_params is not None, "Noise params must be provided"
-        #     noise = self.noise_synth(noise_params, original.shape[-1])
-        #     noise = rearrange(noise, "b n -> b () n")
-        #     y_hat = y_hat + noise
-
         return y_hat
 
     def _do_step(self, batch: Tuple[torch.Tensor, ...]):
@@ -115,8 +109,6 @@ class DrumBlender(pl.LightningModule):
             raise ValueError("Expected batch to be a tuple of length 3")
 
         y_hat = self(original, params)
-
-        # y_hat = self(original, modal, features)
         loss = self.loss_fn(y_hat, original)
         return loss, y_hat
 

@@ -137,7 +137,7 @@ def test_drumblender_can_forward(mocker):
             super().__init__()
             self.output = output
 
-        def forward(self, p):
+        def forward(self, p, length=None):
             return self.output
 
     loss_fn = mocker.stub("loss_fn")
@@ -156,4 +156,4 @@ def test_drumblender_can_forward(mocker):
     y = model(x, p)
 
     assert y == expected_output
-    modal_spy.assert_called_once_with(p)
+    modal_spy.assert_called_once_with(p, x.size(-1))
