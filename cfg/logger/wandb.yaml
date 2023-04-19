@@ -1,6 +1,6 @@
 class_path: pytorch_lightning.loggers.WandbLogger
 init_args:
-  project: percussion-synth
+  project: drumblender
   save_dir: logs/wandb
 # dict_kwargs:
 #   entity: c4dm
