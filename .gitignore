@@ -242,3 +242,6 @@ logs/
 
 # Rendered audio
 test_audio/
+
+#VSCode Workspace
+*.code-workspace
