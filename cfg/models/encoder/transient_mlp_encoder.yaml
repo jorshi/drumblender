@@ -14,8 +14,7 @@ init_args:
     init_args:
       input_size: 256
       hidden_size: 512
-      output_size: 64
+      output_size: 256
       hidden_layers: 3
       activation: LeakyReLU
-      output_activation: Sigmoid
   latent_size: 256

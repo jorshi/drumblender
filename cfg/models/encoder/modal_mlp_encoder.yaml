@@ -1,4 +1,25 @@
 class_path: drumblender.models.ModalAutoEncoder
 init_args:
-  autoencoder: mlp_encoder.yaml
-  mod_dim: 2
+  autoencoder:
+    class_path: drumblender.models.AutoEncoder
+    init_args:
+      encoder:
+        class_path: drumblender.models.MLP
+        init_args:
+          input_size: 512
+          hidden_size: 512
+          output_size: 256
+          hidden_layers: 3
+          activation: LeakyReLU
+          output_activation: null
+      decoder:
+        class_path: drumblender.models.MLP
+        init_args:
+          input_size: 256
+          hidden_size: 512
+          output_size: 64
+          hidden_layers: 3
+          activation: LeakyReLU
+          output_activation: Sigmoid
+      latent_size: 256
+  mod_dim: 1

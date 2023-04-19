@@ -86,7 +86,7 @@ class DrumBlender(pl.LightningModule):
 
         transient_params = None
         if self.transient_autoencoder is not None:
-            transient_params = self.transient_autoencoder(embedding)
+            transient_params, _ = self.transient_autoencoder(embedding)
 
         # Synthesis
         y_hat = self.modal_synth(modal_params, original.shape[-1])

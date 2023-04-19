@@ -7,6 +7,5 @@ init_args:
   dilation_blocks: 8
   num_layers: 8
   kernel_size: 13
-  film_conditioning: true
-  film_embedding_size: 256
-  film_batch_norm: true
+  transient_conditioning: false
+  transient_conditioning_channels: 31

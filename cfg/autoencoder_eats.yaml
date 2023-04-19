@@ -1,10 +1,11 @@
 model:
   class_path: drumblender.tasks.DrumBlender
   init_args:
-    encoder: models/embedding/eats_64.yaml
+    encoder: models/embedding/eats_512.yaml
     modal_synth: drumblender.synths.ModalSynth
     modal_autoencoder: models/encoder/modal_mlp_encoder.yaml
     transient_synth: synths/transient_tcn.yaml
+    transient_autoencoder: models/encoder/transient_mlp_encoder.yaml
     noise_synth: synths/noise.yaml
     noise_autoencoder:
       class_path: drumblender.models.encoders.NoiseParameters

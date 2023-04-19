@@ -6,7 +6,7 @@ model:
       class_path: drumblender.models.encoders.ModalAmpParameters
       init_args:
         num_modes: 64
-    transient_synth: synths/transient_tcn.yaml
+    transient_synth: synths/transient_tcn_nofilm.yaml
     noise_synth: synths/noise.yaml
     noise_autoencoder:
       class_path: drumblender.models.encoders.NoiseParameters
