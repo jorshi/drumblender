@@ -4,6 +4,7 @@ import torch
 from einops import rearrange
 from torch import nn
 
+from drumblender.models.components import AttentionPooling
 from drumblender.models.components import FiLM
 from drumblender.models.components import Pad
 
@@ -176,3 +177,24 @@ class SoundStreamEncoder(nn.Module):
             return x
 
         return self.output(x)
+
+
+class SoundStreamAttentionEncoder(nn.Module):
+
+    """SoundStream encoder with attention pooling"""
+
+    def __init__(
+        self, input_channels: int, hidden_channels: int, output_channels: int, **kwargs
+    ):
+        super().__init__()
+        self.encoder = SoundStreamEncoder(
+            input_channels, hidden_channels, output_channels, **kwargs
+        )
+        self.pooling = AttentionPooling(output_channels)
+
+    def forward(
+        self, x: torch.Tensor, film_embedding: Optional[torch.Tensor] = None
+    ) -> torch.Tensor:
+        x = self.encoder(x, film_embedding)
+        x = self.pooling(x)
+        return x

@@ -8,5 +8,5 @@ init_args:
   num_layers: 8
   kernel_size: 13
   film_conditioning: true
-  film_embedding_size: 256
+  film_embedding_size: 128
   film_batch_norm: true

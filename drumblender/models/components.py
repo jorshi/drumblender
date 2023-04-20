@@ -2,6 +2,7 @@
 """
 import torch
 from einops import rearrange
+from einops import repeat
 from torch import nn
 
 
@@ -123,3 +124,24 @@ class BatchNormProjection(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.net(x)
         return x
+
+
+class AttentionPooling(nn.Module):
+    def __init__(self, in_features: int, keep_seq_dim: bool = False):
+        super().__init__()
+        self.norm = nn.LayerNorm(in_features)
+        self.query = nn.Parameter(torch.zeros(1, 1, in_features))
+        self.attn = nn.MultiheadAttention(in_features, 1, bias=False)
+        self.keep_seq_dim = keep_seq_dim
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Expects shape (batch_size, channels, time)"""
+        x = rearrange(x, "b c t -> t b c")
+        x = self.norm(x)
+        q = repeat(self.query, "() () c -> () b c", b=x.shape[1])
+        attn, _ = self.attn(q, x, x, need_weights=False)
+        if self.keep_seq_dim:
+            attn = rearrange(attn, "t b c -> b c t")
+        else:
+            attn = attn.squeeze(dim=0)
+        return attn

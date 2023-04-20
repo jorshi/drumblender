@@ -1,0 +1,8 @@
+class_path: drumblender.models.soundstream.SoundStreamAttentionEncoder
+init_args:
+  input_channels: 1
+  hidden_channels: 16
+  output_channels: 128
+  strides: [2, 2, 4, 8]
+  causal: false
+  transpose_output: false
