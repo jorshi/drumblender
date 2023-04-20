@@ -30,6 +30,7 @@ class LogAudioCallback(Callback):
         save_audio_sr: int = 48000,
         n_batches: int = 1,
         log_on_epoch_end: bool = False,
+        max_audio_samples: int = 8,
     ):
         self.on_train = on_train
         self.on_val = on_val
@@ -44,6 +45,7 @@ class LogAudioCallback(Callback):
         )
 
         self.log_on_epoch_end = log_on_epoch_end
+        self.max_audio_samples = max_audio_samples
 
     # Store a local reference to the model on setup
     def setup(
@@ -203,6 +205,10 @@ class LogAudioCallback(Callback):
 
         targets = torch.cat(self.saved_targets[split], dim=0)
         reconstructions = torch.cat(self.saved_reconstructions[split], dim=0)
+
+        if self.max_audio_samples is not None:
+            targets = targets[: self.max_audio_samples]
+            reconstructions = reconstructions[: self.max_audio_samples]
 
         signals = reduce(
             lambda x, y: x + y, zip(targets, reconstructions)  # type: ignore
