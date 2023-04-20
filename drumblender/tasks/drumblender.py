@@ -50,6 +50,9 @@ class DrumBlender(pl.LightningModule):
         transient_autoencoder: Optional[nn.Module] = None,
         encoder: Optional[nn.Module] = None,
         transient_parallel: bool = False,
+        modal_autoencoder_accepts_audio: bool = False,
+        noise_autoencoder_accepts_audio: bool = False,
+        transient_autoencoder_accepts_audio: bool = False,
         float32_matmul_precision: Literal["medium", "high", "highest", None] = None,
     ):
         super().__init__()
@@ -63,6 +66,9 @@ class DrumBlender(pl.LightningModule):
         self.transient_autoencoder = transient_autoencoder
         self.encoder = encoder
         self.transient_parallel = transient_parallel
+        self.modal_autoencoder_accepts_audio = modal_autoencoder_accepts_audio
+        self.noise_autoencoder_accepts_audio = noise_autoencoder_accepts_audio
+        self.transient_autoencoder_accepts_audio = transient_autoencoder_accepts_audio
 
         if float32_matmul_precision is not None:
             torch.set_float32_matmul_precision(float32_matmul_precision)
@@ -80,15 +86,24 @@ class DrumBlender(pl.LightningModule):
         # Modal parameter autoencoder
         modal_params = params
         if self.modal_autoencoder is not None:
-            modal_params, _ = self.modal_autoencoder(embedding, params)
+            if self.modal_autoencoder_accepts_audio:
+                modal_params = self.modal_autoencoder(original, params)
+            else:
+                modal_params, _ = self.modal_autoencoder(embedding, params)
 
         noise_params = None
         if self.noise_autoencoder is not None:
-            noise_params, _ = self.noise_autoencoder(embedding)
+            if self.noise_autoencoder_accepts_audio:
+                noise_params = self.noise_autoencoder(original)
+            else:
+                noise_params, _ = self.noise_autoencoder(embedding)
 
         transient_params = None
         if self.transient_autoencoder is not None:
-            transient_params, _ = self.transient_autoencoder(embedding)
+            if self.transient_autoencoder_accepts_audio:
+                transient_params = self.transient_autoencoder(original)
+            else:
+                transient_params, _ = self.transient_autoencoder(embedding)
 
         # Synthesis
         y_hat = self.modal_synth(modal_params, original.shape[-1])

@@ -58,7 +58,7 @@ class NoiseParameters(torch.nn.Module):
         self.params = torch.nn.Parameter(p)
 
     def forward(self, x: torch.tensor, params: Optional[torch.tensor] = None):
-        return self.params
+        return (self.params, None)
 
 
 class AutoEncoder(torch.nn.Module):

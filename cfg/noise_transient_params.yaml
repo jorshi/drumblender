@@ -1,0 +1,72 @@
+model:
+  class_path: drumblender.tasks.DrumBlender
+  init_args:
+    encoder: null
+    modal_synth: drumblender.synths.ModalSynth
+    modal_autoencoder: null
+    transient_synth: synths/transient_tcn_nofilm.yaml
+    transient_autoencoder: null
+    noise_synth: synths/noise.yaml
+    noise_autoencoder:
+      class_path: drumblender.models.encoders.NoiseParameters
+      init_args:
+        param_shape:
+          - 1
+          - 750
+          - 64
+    noise_autoencoder_accepts_audio: false
+    loss_fn: loss/mss.yaml
+    transient_parallel: false
+    float32_matmul_precision: medium
+optimizer:
+  class_path: torch.optim.Adam
+  init_args:
+    lr: 0.0001
+lr_scheduler:
+  class_path: pytorch_lightning.cli.ReduceLROnPlateau
+  init_args:
+    monitor: validation/loss
+    factor: 0.5
+    patience: 20
+data: data/singles/snare_single_cajon.yaml
+trainer:
+  devices: 1
+  accelerator: gpu
+  max_epochs: -1
+  # logger:
+  #   class_path: pytorch_lightning.loggers.WandbLogger
+  #   init_args:
+  #     name: eats_ae_no_transient
+  #     project: drumblender
+  #     save_dir: logs
+  #     log_model: true
+  #   dict_kwargs:
+  #     job_type: train
+  #     group: initial
+  #     entity: jordieshier
+  callbacks:
+    - class_path: pytorch_lightning.callbacks.early_stopping.EarlyStopping
+      init_args:
+        monitor: validation/loss
+        patience: 40
+        check_finite: true
+    - class_path: pytorch_lightning.callbacks.LearningRateMonitor
+    - class_path: drumblender.callbacks.LogAudioCallback
+      init_args:
+        on_train: true
+        on_val: true
+        on_test: true
+        save_audio_sr: 48000
+        n_batches: 1
+    # - class_path: drumblender.callbacks.CleanWandbCacheCallback
+    #   init_args:
+    #     every_n_epochs: 2
+    #     max_size_in_gb: 2
+    # - class_path: pytorch_lightning.callbacks.BatchSizeFinder
+    #   init_args:
+    #     mode: binsearch
+    #     steps_per_trial: 10
+    #     init_val: 2
+    #     max_trials: 25
+    #     batch_arg_name: batch_size
+seed_everything: 396818285
