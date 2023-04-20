@@ -22,7 +22,7 @@ lr_scheduler:
     monitor: validation/loss
     factor: 0.5
     patience: 20
-data: data/singles/snare_single_cajon.yaml
+data: data/percussion.yaml
 trainer:
   devices: 1
   accelerator: gpu
