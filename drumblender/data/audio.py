@@ -49,6 +49,7 @@ class AudioDataset(Dataset):
         split_strategy: Literal["sample_pack", "random"] = "random",
         normalize: bool = False,
         sample_types: Optional[List[str]] = None,
+        instruments: Optional[List[str]] = None,
     ):
         super().__init__()
         self.data_dir = Path(data_dir)
@@ -58,6 +59,7 @@ class AudioDataset(Dataset):
         self.seed = seed
         self.normalize = normalize
         self.sample_types = sample_types
+        self.instruments = instruments
 
         # Confirm that preprocessed dataset exists
         if not self.data_dir.exists():
@@ -163,8 +165,15 @@ class AudioDataset(Dataset):
         splits["percent"] = splits["counts"] / splits["counts"].sum()
         log.info(f"Split counts:\n{splits}")
 
-        # Set the file list based on the split
-        self.file_list = data[data["split"] == split].index.tolist()
+        # Filter by instrument types if specified
+        if "instrument" in data.columns and self.instruments is not None:
+            data = data[data["instrument"].isin(self.instruments)]
+
+        # Filter by split
+        data = data[data["split"] == split]
+
+        # Convert to list for file list
+        self.file_list = data.index.tolist()
 
     def _random_split(self, split: str):
         """
