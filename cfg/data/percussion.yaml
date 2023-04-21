@@ -22,4 +22,5 @@ init_args:
   save_modal_audio: false
   dataset_kwargs:
     seed: 42
-    feature_key: feature_file
+    parameter_key: feature_file
+    split_strategy: sample_pack

@@ -7,7 +7,9 @@ import sys
 import yaml
 from dotenv import load_dotenv
 from jsonargparse import ArgumentParser
+from pytorch_lightning import LightningDataModule
 from pytorch_lightning.cli import LightningCLI
+from tqdm import tqdm
 
 import drumblender.utils.data as data_utils
 from drumblender.callbacks import SaveConfigCallbackWanb
@@ -58,6 +60,11 @@ def dataset():
         default=None,
         help="If set, will upload an archived dataset to the bucket KickDataset bucket",
     )
+    parser.add_argument(
+        "--verify",
+        action="store_true",
+        help="If set, will check that all dataset files are present.",
+    )
 
     args = parser.parse_args(sys.argv[1:])
 
@@ -96,5 +103,23 @@ def dataset():
         datamodule.preprocess_features(overwrite=True)
         return
 
+    if args.verify:
+        verify_dataset(datamodule)
+        return
+
     # Prepare the dataset
     datamodule.prepare_data(use_preprocessed=not args.preprocess)
+
+
+def verify_dataset(datamodule: LightningDataModule):
+    for split in ["fit", "validate", "test"]:
+        datamodule.setup(split)
+        if split == "fit":
+            dataset = datamodule.train_dataloader().dataset
+        elif split == "validate":
+            dataset = datamodule.val_dataloader().dataset
+        else:
+            dataset = datamodule.test_dataloader().dataset
+
+        for i in tqdm(range(len(dataset))):
+            _ = dataset[i]
