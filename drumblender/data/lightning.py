@@ -387,6 +387,7 @@ class ModalDataModule(AudioDataModule):
                     modal_freqs,
                     modal_amps,
                     self.num_samples,
+                    modal_phases,
                 )
                 modal_audio_file = audio_file.parent.joinpath(
                     audio_file.name.replace(".wav", "_modal.wav")
