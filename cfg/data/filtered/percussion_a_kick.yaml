@@ -24,3 +24,7 @@ init_args:
     seed: 5152845
     parameter_key: feature_file
     split_strategy: sample_pack
+    sample_types:
+      - acoustic
+    instruments:
+      - kick
