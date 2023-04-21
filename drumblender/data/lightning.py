@@ -196,6 +196,10 @@ class AudioDataModule(pl.LightningDataModule):
             )
             assert len(files) > 0, f"No files founds in folders: {folders}"
 
+            # If there is no metadata for the files, create an empty dict
+            if len(file_metadata) == 0:
+                file_metadata = [{}] * len(files)
+
             for file, file_meta in zip(files, file_metadata, strict=True):
                 # Create a hashed name for the file based on its path
                 # minus the root directory
