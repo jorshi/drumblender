@@ -9,6 +9,58 @@ import torch
 from einops import repeat
 
 
+class VariationalEncoder(torch.nn.Module):
+    """Variational Encoder wrapper for torch modules implementing Encoders.
+
+    Assumes: Encoder Module parameterizes a Multimodal Gaussian distribution.
+      Furthermore, data prior P(Z) is Gaussian with zero mean and unit std.
+
+      Under these assumptions, implements the reparametrization trick and
+      computes the KL Divergence.
+
+    Features "warmed up" flag for stopping gradient propagation after
+      representation learning stage. (could be useful).
+
+    Extracted from RAVE: https://github.com/acids-ircam/RAVE/
+
+    """
+
+    def __init__(self, encoder: torch.nn.Module):
+        super().__init__()
+        self.encoder = encoder
+        self.register_buffer("warmed_up", torch.tensor(0))
+
+    def reparametrize(self, z: torch.tensor):
+        """Sample from a parameterized gaussian given as an input.
+        Args:
+          z (torch.tensor): A batch of inputs where the parameterized Gaussian
+            is at dim=1.
+
+        Returns:
+          A tuple containing the sampled vector (with dim=1 halved),
+          and the kl divergence.
+        """
+        mean, scale = z.chunk(2, 1)
+        std = torch.nn.functional.softplus(scale) + 1e-4
+        var = std * std
+        logvar = torch.log(var)
+
+        z = torch.randn_like(mean) * std + mean
+        kl = (mean * mean + var - logvar - 1).sum(1).mean()
+
+        return z, kl
+
+    def set_warmed_up(self, state: bool):
+        state = torch.tensor(int(state), device=self.warmed_up.device)
+        self.warmed_up = state
+
+    def forward(self, x: torch.Tensor):
+        z = self.encoder(x)
+        if self.warmed_up:
+            z = z.detach()
+        return z
+
+
 class DummyParameterEncoder(torch.nn.Module):
     """
     Dummy encoder returns a set of learnable parameters
