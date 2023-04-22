@@ -6,8 +6,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from einops import rearrange
 
-import drumblender.utils.audio as audio_utils
-
 
 class ModalSynthFreqs(nn.Module):
     def __init__(
@@ -125,7 +123,7 @@ class ModalSynth(torch.nn.Module):
         num_samples: number of samples to generate
         """
         assert params.ndim == 4, "Expected 4D tensor"
-        assert params.size()[1] == [2, 3], "Expected 2 or 3 parameters"
+        assert params.size()[1] in [2, 3], "Expected 2 or 3 parameters"
 
         params = torch.chunk(params, params.size()[1], dim=1)
         params = [p.squeeze(1) for p in params]
@@ -135,7 +133,7 @@ class ModalSynth(torch.nn.Module):
         if len(params) == 3:
             phase = params[2]
 
-        y = audio_utils.modal_synth(params[0], params[1], num_samples, phase)
+        y = modal_synth(params[0], params[1], num_samples, phase)
         y = rearrange(y, "b n -> b 1 n")
         return y
 
