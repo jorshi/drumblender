@@ -29,17 +29,17 @@ trainer:
   devices: 1
   accelerator: gpu
   max_epochs: -1
-  # logger:
-  #   class_path: pytorch_lightning.loggers.WandbLogger
-  #   init_args:
-  #     name: soundstream_transient_params
-  #     project: drumblender
-  #     save_dir: logs
-  #     log_model: true
-  #   dict_kwargs:
-  #     job_type: train
-  #     group: initial
-  #     entity: francocaspe
+  logger:
+    class_path: pytorch_lightning.loggers.WandbLogger
+    init_args:
+      name: noise_transient_params
+      project: drumblender
+      save_dir: logs
+      log_model: true
+    dict_kwargs:
+      job_type: train
+      group: ablation
+      entity: jordieshier
   callbacks:
     - class_path: pytorch_lightning.callbacks.early_stopping.EarlyStopping
       init_args:
