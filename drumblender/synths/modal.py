@@ -1,3 +1,4 @@
+from typing import Optional
 from typing import Tuple
 
 import torch
@@ -124,12 +125,17 @@ class ModalSynth(torch.nn.Module):
         num_samples: number of samples to generate
         """
         assert params.ndim == 4, "Expected 4D tensor"
-        assert params.size()[1] in [2, 3], "Expected 2 or 3 parameters"
+        assert params.size()[1] == [2, 3], "Expected 2 or 3 parameters"
 
         params = torch.chunk(params, params.size()[1], dim=1)
         params = [p.squeeze(1) for p in params]
 
-        y = audio_utils.modal_synth(params[0], params[1], num_samples)
+        # Pass the phase if it was given, otherwise None
+        phase = None
+        if len(params) == 3:
+            phase = params[2]
+
+        y = audio_utils.modal_synth(params[0], params[1], num_samples, phase)
         y = rearrange(y, "b n -> b 1 n")
         return y
 
@@ -138,6 +144,7 @@ def modal_synth(
     freqs: torch.Tensor,
     amps: torch.Tensor,
     num_samples: int,
+    phase: Optional[torch.Tensor] = None,
 ) -> torch.Tensor:
     """
     Synthesizes a modal signal from a set of frequencies, phases, and amplitudes.
@@ -159,6 +166,9 @@ def modal_synth(
     a = rearrange(a, "b m n -> (b m) n")
     w = rearrange(w, "b m n -> (b m) n")
     phase_env = torch.cumsum(w, dim=1)
+    if phase is not None:
+        phase = rearrange(phase, "b m n -> (b m) n")
+        phase_env = phase_env + phase[..., 0, None]
 
     # Generate the modal signal
     y = a * torch.sin(phase_env)

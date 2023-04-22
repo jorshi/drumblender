@@ -49,6 +49,7 @@ class AudioDataset(Dataset):
         split_strategy: Literal["sample_pack", "random"] = "random",
         normalize: bool = False,
         sample_types: Optional[List[str]] = None,
+        instruments: Optional[List[str]] = None,
     ):
         super().__init__()
         self.data_dir = Path(data_dir)
@@ -58,6 +59,7 @@ class AudioDataset(Dataset):
         self.seed = seed
         self.normalize = normalize
         self.sample_types = sample_types
+        self.instruments = instruments
 
         # Confirm that preprocessed dataset exists
         if not self.data_dir.exists():
@@ -102,6 +104,15 @@ class AudioDataset(Dataset):
     def _sample_pack_split(
         self, split: str, test_size: float = 0.1, val_size: float = 0.1
     ):
+        split_metadata = self._sample_pack_split_metadata(split, test_size, val_size)
+
+        # Convert to list for file list
+        self.file_list = split_metadata.index.tolist()
+        log.info(f"Number of samples in {split} set: {len(self.file_list)}")
+
+    def _sample_pack_split_metadata(
+        self, split: str, test_size: float = 0.1, val_size: float = 0.1
+    ):
         """
         Split the dataset into train, validation, and test sets. This creates splits
         that are disjont with respect to sample packs and have same the proportion of
@@ -118,7 +129,7 @@ class AudioDataset(Dataset):
 
         # Count the number of samples in each type (e.g. electric, acoustic)
         data_types = data.groupby("type").size().reset_index(name="counts")
-        log.info(f"Number of samples by type:\n {data_types}")
+        # log.info(f"Number of samples by type:\n {data_types}")
 
         # Filter by sample types
         if self.sample_types is not None:
@@ -163,8 +174,25 @@ class AudioDataset(Dataset):
         splits["percent"] = splits["counts"] / splits["counts"].sum()
         log.info(f"Split counts:\n{splits}")
 
-        # Set the file list based on the split
-        self.file_list = data[data["split"] == split].index.tolist()
+        # Filter by instrument types if specified
+        if "instrument" in data.columns:
+            log.info(f"Insrumens in dataset: {data['instrument'].unique()}")
+            if self.instruments is not None:
+                log.info(f"Filtering by instruments: {self.instruments}")
+                data = data[data["instrument"].isin(self.instruments)]
+
+        # Filter by split
+        data = data[data["split"] == split]
+
+        # Logging
+        data_types = data.groupby("type").size().reset_index(name="counts")
+        log.info(f"Number of samples by type:\n {data_types}")
+
+        if "instrument" in data.columns:
+            inst_types = data.groupby("instrument").size().reset_index(name="counts")
+            log.info(f"Number of samples by instrument:\n {inst_types}")
+
+        return data
 
     def _random_split(self, split: str):
         """
