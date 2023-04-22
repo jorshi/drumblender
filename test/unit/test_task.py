@@ -73,7 +73,10 @@ def test_drumblender_forwards_all(mocker):
     modal_encoder = FakeModule(expected_modal_encoder_output)
     modal_encoder_spy = mocker.spy(modal_encoder, "forward")
 
-    expected_noise_encoder_output = torch.rand(batch_size, embedding_size)
+    expected_noise_encoder_output = (
+        torch.rand(batch_size, embedding_size),
+        torch.rand(batch_size, latent_size),
+    )
     noise_encoder = FakeModule(expected_noise_encoder_output)
     noise_encoder_spy = mocker.spy(noise_encoder, "forward")
 
@@ -109,6 +112,7 @@ def test_drumblender_forwards_all(mocker):
         modal_synth=modal_synth,
         noise_synth=noise_synth,
         transient_synth=transient_synth,
+        transient_takes_noise=True,
     )
 
     y = model(x, p)
@@ -120,7 +124,7 @@ def test_drumblender_forwards_all(mocker):
     transient_encoder_spy.assert_called_once_with(expected_encoder_output)
 
     modal_spy.assert_called_once_with(expected_modal_encoder_output[0], x.size(-1))
-    noise_spy.assert_called_once_with(expected_noise_encoder_output, x.size(-1))
+    noise_spy.assert_called_once_with(expected_noise_encoder_output[0], x.size(-1))
 
     transient_input = expected_modal_output + rearrange(
         expected_noise_output, "b t -> b () t"
