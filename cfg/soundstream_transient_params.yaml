@@ -7,10 +7,10 @@ model:
     transient_synth: synths/transient_tcn.yaml
     transient_autoencoder: models/encoder/transient_soundstream.yaml
     transient_autoencoder_accepts_audio: true
-    transient_takes_noise: true
-    noise_synth: synths/noise.yaml
-    noise_autoencoder: models/encoder/noise_soundstream.yaml
-    noise_autoencoder_accepts_audio: true
+    transient_takes_noise: false
+    noise_synth: null
+    noise_autoencoder: null
+    noise_autoencoder_accepts_audio: false
     loss_fn: loss/mss.yaml
     transient_parallel: false
     float32_matmul_precision: medium
