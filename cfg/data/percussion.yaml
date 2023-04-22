@@ -1,6 +1,6 @@
 class_path: drumblender.data.ModalDataModule
 init_args:
-  batch_size: 4
+  batch_size: 12
   num_workers: 8
   dataset_class: drumblender.data.AudioWithParametersDataset
   url: https://d5d740b2d880827ae0c8f465bf180715.r2.cloudflarestorage.com
