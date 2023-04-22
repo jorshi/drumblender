@@ -4,7 +4,7 @@ init_args:
   num_workers: 8
   dataset_class: drumblender.data.AudioWithParametersDataset
   url: https://d5d740b2d880827ae0c8f465bf180715.r2.cloudflarestorage.com
-  archive: drumblender-percussion-dataset-v0.tar.gz
+  archive: drumblender-percussion-dataset-v1.tar.gz
   bucket: drum-dataset
   data_dir: dataset/percussion
   data_dir_unprocessed: dataset-unprocessed/percussion-dataset
@@ -16,7 +16,7 @@ init_args:
   min_length: 10
   hop_length: 256
   fmin: 20
-  n_bins: 168
+  n_bins: 240
   bins_per_octave: 24
   diff_threshold: 5.0
   save_modal_audio: false
