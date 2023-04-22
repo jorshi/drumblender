@@ -184,11 +184,13 @@ class AudioDataset(Dataset):
         # Filter by split
         data = data[data["split"] == split]
 
+        # Logging
         data_types = data.groupby("type").size().reset_index(name="counts")
         log.info(f"Number of samples by type:\n {data_types}")
 
-        inst_types = data.groupby("instrument").size().reset_index(name="counts")
-        log.info(f"Number of samples by instrument:\n {inst_types}")
+        if "instrument" in data.columns:
+            inst_types = data.groupby("instrument").size().reset_index(name="counts")
+            log.info(f"Number of samples by instrument:\n {inst_types}")
 
         return data
 
