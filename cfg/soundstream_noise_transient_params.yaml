@@ -7,6 +7,7 @@ model:
     transient_synth: synths/transient_tcn.yaml
     transient_autoencoder: models/encoder/transient_soundstream.yaml
     transient_autoencoder_accepts_audio: true
+    transient_takes_noise: true
     noise_synth: synths/noise.yaml
     noise_autoencoder: models/encoder/noise_soundstream.yaml
     noise_autoencoder_accepts_audio: true
@@ -31,14 +32,14 @@ trainer:
   # logger:
   #   class_path: pytorch_lightning.loggers.WandbLogger
   #   init_args:
-  #     name: soundstream_noise_transient_params
+  #     name: soundstream_transient_params
   #     project: drumblender
   #     save_dir: logs
   #     log_model: true
   #   dict_kwargs:
   #     job_type: train
   #     group: initial
-  #     entity: jordieshier
+  #     entity: francocaspe
   callbacks:
     - class_path: pytorch_lightning.callbacks.early_stopping.EarlyStopping
       init_args:
@@ -57,11 +58,11 @@ trainer:
       init_args:
         every_n_epochs: 2
         max_size_in_gb: 2
-    # - class_path: pytorch_lightning.callbacks.BatchSizeFinder
-    #   init_args:
-    #     mode: binsearch
-    #     steps_per_trial: 10
-    #     init_val: 2
-    #     max_trials: 25
-    #     batch_arg_name: batch_size
+    - class_path: pytorch_lightning.callbacks.BatchSizeFinder
+      init_args:
+        mode: binsearch
+        steps_per_trial: 10
+        init_val: 2
+        max_trials: 25
+        batch_arg_name: batch_size
 seed_everything: 396818285

@@ -50,6 +50,7 @@ class DrumBlender(pl.LightningModule):
         transient_autoencoder: Optional[nn.Module] = None,
         encoder: Optional[nn.Module] = None,
         transient_parallel: bool = False,
+        transient_takes_noise: bool = False,
         modal_autoencoder_accepts_audio: bool = False,
         noise_autoencoder_accepts_audio: bool = False,
         transient_autoencoder_accepts_audio: bool = False,
@@ -69,6 +70,7 @@ class DrumBlender(pl.LightningModule):
         self.modal_autoencoder_accepts_audio = modal_autoencoder_accepts_audio
         self.noise_autoencoder_accepts_audio = noise_autoencoder_accepts_audio
         self.transient_autoencoder_accepts_audio = transient_autoencoder_accepts_audio
+        self.transient_takes_noise = transient_takes_noise
 
         if float32_matmul_precision is not None:
             torch.set_float32_matmul_precision(float32_matmul_precision)
@@ -112,7 +114,8 @@ class DrumBlender(pl.LightningModule):
             assert noise_params is not None, "Noise params must be provided"
             noise = self.noise_synth(noise_params, original.shape[-1])
             noise = rearrange(noise, "b n -> b () n")
-            y_hat = y_hat + noise
+            if self.transient_takes_noise:
+                y_hat = y_hat + noise
 
         if self.transient_synth is not None:
             transient = self.transient_synth(y_hat, transient_params)
@@ -122,6 +125,12 @@ class DrumBlender(pl.LightningModule):
                 y_hat = y_hat + transient
             else:
                 y_hat = transient
+
+        # Finally, if we have noise and did not add it through
+        # the TCN, add noise in parallel.
+        if self.noise_synth is not None:
+            if self.transient_takes_noise is False:
+                y_hat = y_hat + noise
 
         return y_hat
 
