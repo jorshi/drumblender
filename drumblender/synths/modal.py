@@ -125,12 +125,17 @@ class ModalSynth(torch.nn.Module):
         num_samples: number of samples to generate
         """
         assert params.ndim == 4, "Expected 4D tensor"
-        assert params.size()[1] in [2, 3], "Expected 2 or 3 parameters"
+        assert params.size()[1] == [2, 3], "Expected 2 or 3 parameters"
 
         params = torch.chunk(params, params.size()[1], dim=1)
         params = [p.squeeze(1) for p in params]
 
-        y = audio_utils.modal_synth(params[0], params[1], num_samples)
+        # Pass the phase if it was given, otherwise None
+        phase = None
+        if len(params) == 3:
+            phase = params[2]
+
+        y = audio_utils.modal_synth(params[0], params[1], num_samples, phase)
         y = rearrange(y, "b n -> b 1 n")
         return y
 
