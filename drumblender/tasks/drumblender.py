@@ -132,29 +132,39 @@ class DrumBlender(pl.LightningModule):
             if self.transient_takes_noise is False:
                 y_hat = y_hat + noise
 
-        return y_hat
+        return (y_hat, transient_params)
 
     def _do_step(self, batch: Tuple[torch.Tensor, ...]):
-        if len(batch) == 2:
-            original, params = batch
+        if len(batch) == 3:
+            original = batch[0]
+            params = batch[1]
         else:
-            raise ValueError("Expected batch to be a tuple of length 2")
+            raise ValueError("Expected batch to be a tuple of length 3")
 
-        y_hat = self(original, params)
+        outputs = self(original, params)
+        y_hat = outputs[0]
         loss = self.loss_fn(y_hat, original)
-        return loss, y_hat
+        return loss, outputs
 
-    def training_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int):
+    def training_step(
+        self, batch: Tuple[torch.Tensor, torch.Tensor, ...], batch_idx: int
+    ):
         loss, _ = self._do_step(batch)
         self.log("train/loss", loss, on_epoch=True)
         return loss
 
-    def validation_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int):
+    def validation_step(
+        self, batch: Tuple[torch.Tensor, torch.Tensor, ...], batch_idx: int
+    ):
         loss, _ = self._do_step(batch)
         self.log("validation/loss", loss)
         return loss
 
-    def test_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int):
-        loss, y_hat = self._do_step(batch)
+    def test_step(self, batch: Tuple[torch.Tensor, torch.Tensor, ...], batch_idx: int):
+        loss, outputs = self._do_step(batch)
         self.log("test/loss", loss)
+        transient_params = outputs[1]
+        if transient_params is not None:
+            labels = batch[2]
+            self.store_transient_params(transient_params, labels)
         return loss
