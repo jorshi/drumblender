@@ -4,6 +4,7 @@ drumblender command line interface entrypoint.
 import argparse
 import sys
 
+import torch
 import yaml
 from dotenv import load_dotenv
 from jsonargparse import ArgumentParser
@@ -12,6 +13,7 @@ from pytorch_lightning.cli import LightningCLI
 from tqdm import tqdm
 
 import drumblender.utils.data as data_utils
+import drumblender.utils.model as model_utils
 from drumblender.callbacks import SaveConfigCallbackWanb
 from drumblender.data import AudioDataModule
 
@@ -123,3 +125,85 @@ def verify_dataset(datamodule: LightningDataModule):
 
         for i in tqdm(range(len(dataset))):
             _ = dataset[i]
+
+
+def get_dataset_for_split(datamodule: AudioDataModule, split: str):
+    if split == "train":
+        datamodule.setup("fit")
+        dataset = datamodule.train_dataloader().dataset
+    elif split == "val":
+        datamodule.setup("validate")
+        dataset = datamodule.val_dataloader().dataset
+    elif split == "test":
+        datamodule.setup("test")
+        dataset = datamodule.test_dataloader().dataset
+    else:
+        raise ValueError(f"Invalid split: {split}")
+
+    return dataset
+
+
+def export_film_embeddings():
+    """
+    CLI Entrypint for loading a pretrained model and exporting the film embeddings
+    """
+
+    load_dotenv()
+    parser = ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    parser.add_argument(
+        "config",
+        type=str,
+        help="Path to a config file with arguments.",
+    )
+    parser.add_argument(
+        "checkpoint",
+        type=str,
+        help="Path to a checkpoint file.",
+    )
+    parser.add_argument(
+        "outdir",
+        type=str,
+        help="Path to a directory to save the generated files.",
+    )
+    parser.add_argument(
+        "--split",
+        type=str,
+        default="test",
+        help="Which split to use for generating embeddings. [train, val, test]]",
+    )
+    parser.add_argument(
+        "--data",
+        type=str,
+        default=None,
+        help="Override the dataset to use",
+    )
+
+    args = parser.parse_args(sys.argv[1:])
+
+    # Load the model and datamodule
+    include_data = args.data is None
+    model, datamodule = model_utils.load_model(
+        args.config, args.checkpoint, include_data=include_data
+    )
+
+    # If a different dataset is specified, load it here.
+    if args.data is not None:
+        datamodule = model_utils.load_datamodule(args.data)
+
+    # Move model to device and set to eval mode
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    if device == "cuda":
+        model = model.cuda()
+    model.eval()
+
+    # Get dataset for split
+    dataset = get_dataset_for_split(datamodule, args.split)
+
+    # Iterate through dataset
+    for i in tqdm(range(len(dataset))):
+        # Get dataset item and extract FiLM embedding, save to outdir.
+        example = dataset[i]
+
+        # ...
