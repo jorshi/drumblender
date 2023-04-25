@@ -155,7 +155,7 @@ def export_film_embeddings():
     parser.add_argument(
         "config",
         type=str,
-        help="Path to a config file with arguments.",
+        help="Path to a model config file.",
     )
     parser.add_argument(
         "checkpoint",
@@ -165,7 +165,7 @@ def export_film_embeddings():
     parser.add_argument(
         "outdir",
         type=str,
-        help="Path to a directory to save the generated files.",
+        help="Path to a directory to save the generated FiLM embeddings",
     )
     parser.add_argument(
         "--split",
