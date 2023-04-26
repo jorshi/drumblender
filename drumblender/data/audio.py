@@ -353,7 +353,6 @@ class AudioWithParametersDataset(AudioDataset):
         num_samples: int,
         parameter_key: str,
         expected_num_modes: Optional[int] = None,
-        return_labels: Optional[List] = None,
         **kwargs,
     ):
         super().__init__(
@@ -365,7 +364,6 @@ class AudioWithParametersDataset(AudioDataset):
         )
         self.parameter_key = parameter_key
         self.expected_num_modes = expected_num_modes
-        self.return_labels = return_labels
 
     def __getitem__(self, idx):
         (waveform_a,) = super().__getitem__(idx)
@@ -386,9 +384,4 @@ class AudioWithParametersDataset(AudioDataset):
             )
             feature = torch.cat((feature, null_features), dim=1)
 
-        labels = []
-        if self.return_labels is not None:
-            for label in self.return_labels:
-                labels.append(self.metadata[self.file_list[idx]][label])
-
-        return waveform_a, feature, labels
+        return waveform_a, feature

@@ -200,10 +200,16 @@ def export_film_embeddings():
 
     # Get dataset for split
     dataset = get_dataset_for_split(datamodule, args.split)
-
     # Iterate through dataset
-    for i in tqdm(range(len(dataset))):
-        # Get dataset item and extract FiLM embedding, save to outdir.
-        example = dataset[i]
+    param_list = []
+    with torch.no_grad():
+        for i in tqdm(range(len(dataset))):
+            # Get dataset item and extract FiLM embedding, save to outdir.
+            example = dataset[i]
+            original = example[0].to(device).unsqueeze(0)
+            transient_params = model.transient_autoencoder(original)
+            param_list.append(transient_params.to("cpu").clone())
 
-        # ...
+        params = torch.cat(param_list, dim=0)
+    print(f"Collected tensor {params.shape}")
+    torch.save(params, args.outdir)

@@ -132,19 +132,17 @@ class DrumBlender(pl.LightningModule):
             if self.transient_takes_noise is False:
                 y_hat = y_hat + noise
 
-        return (y_hat, transient_params)
+        return y_hat
 
     def _do_step(self, batch: Tuple[torch.Tensor, ...]):
-        if len(batch) == 3:
-            original = batch[0]
-            params = batch[1]
+        if len(batch) == 2:
+            original, params = batch
         else:
             raise ValueError("Expected batch to be a tuple of length 3")
 
-        outputs = self(original, params)
-        y_hat = outputs[0]
+        y_hat = self(original, params)
         loss = self.loss_fn(y_hat, original)
-        return loss, outputs
+        return loss, y_hat
 
     def training_step(self, batch: Tuple[torch.Tensor, ...], batch_idx: int):
         loss, _ = self._do_step(batch)
@@ -157,10 +155,6 @@ class DrumBlender(pl.LightningModule):
         return loss
 
     def test_step(self, batch: Tuple[torch.Tensor, ...], batch_idx: int):
-        loss, outputs = self._do_step(batch)
+        loss, _ = self._do_step(batch)
         self.log("test/loss", loss)
-        transient_params = outputs[1]
-        if transient_params is not None:
-            labels = batch[2]
-            self.store_transient_params(transient_params, labels)
         return loss
