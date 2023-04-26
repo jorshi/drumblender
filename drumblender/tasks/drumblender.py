@@ -54,6 +54,7 @@ class DrumBlender(pl.LightningModule):
         modal_autoencoder_accepts_audio: bool = False,
         noise_autoencoder_accepts_audio: bool = False,
         transient_autoencoder_accepts_audio: bool = False,
+        test_metrics: Optional[torch.nn.ModuleDict] = None,
         float32_matmul_precision: Literal["medium", "high", "highest", None] = None,
     ):
         super().__init__()
@@ -74,6 +75,9 @@ class DrumBlender(pl.LightningModule):
 
         if float32_matmul_precision is not None:
             torch.set_float32_matmul_precision(float32_matmul_precision)
+
+        if test_metrics is not None:
+            self.metrics = test_metrics
 
     def forward(
         self,
@@ -157,4 +161,9 @@ class DrumBlender(pl.LightningModule):
     def test_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int):
         loss, y_hat = self._do_step(batch)
         self.log("test/loss", loss)
+
+        if hasattr(self, "metrics"):
+            for name, metric in self.metrics.items():
+                self.log(f"test/{name}", metric(y_hat, batch[0]))
+
         return loss
