@@ -146,21 +146,17 @@ class DrumBlender(pl.LightningModule):
         loss = self.loss_fn(y_hat, original)
         return loss, outputs
 
-    def training_step(
-        self, batch: Tuple[torch.Tensor, torch.Tensor, ...], batch_idx: int
-    ):
+    def training_step(self, batch: Tuple[torch.Tensor, ...], batch_idx: int):
         loss, _ = self._do_step(batch)
         self.log("train/loss", loss, on_epoch=True)
         return loss
 
-    def validation_step(
-        self, batch: Tuple[torch.Tensor, torch.Tensor, ...], batch_idx: int
-    ):
+    def validation_step(self, batch: Tuple[torch.Tensor, ...], batch_idx: int):
         loss, _ = self._do_step(batch)
         self.log("validation/loss", loss)
         return loss
 
-    def test_step(self, batch: Tuple[torch.Tensor, torch.Tensor, ...], batch_idx: int):
+    def test_step(self, batch: Tuple[torch.Tensor, ...], batch_idx: int):
         loss, outputs = self._do_step(batch)
         self.log("test/loss", loss)
         transient_params = outputs[1]

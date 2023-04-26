@@ -26,6 +26,7 @@ dependencies = [
 [project.scripts]
 drumblender = "drumblender.cli:main"
 drumblender-dataset = "drumblender.cli:dataset"
+drumblender-film = "drumblender.cli:export_film_embeddings"
 
 [project.optional-dependencies]
 dev = ["black", "flake8", "pytest", "pytest-mock", "pyfakefs", "pre-commit", "pytest-cov"]
