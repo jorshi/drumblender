@@ -24,5 +24,6 @@ init_args:
     seed: 5152845
     parameter_key: feature_file
     split_strategy: sample_pack
+    expected_num_modes: 64
     sample_types:
       - acoustic

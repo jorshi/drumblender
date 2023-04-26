@@ -14,12 +14,15 @@ class DummyParameterEncoder(torch.nn.Module):
     Dummy encoder returns a set of learnable parameters
     """
 
-    def __init__(self, param_shape: Union[Tuple, torch.Size]):
+    def __init__(self, param_shape: Union[Tuple, torch.Size], ones: bool = False):
         super().__init__()
-        self.params = torch.nn.Parameter(torch.rand(param_shape))
+        val = torch.rand(param_shape)
+        if ones:
+            val = torch.ones(param_shape)
+        self.params = torch.nn.Parameter(val)
 
     def forward(self, x: torch.tensor, params: Optional[torch.tensor] = None):
-        return self.params
+        return (self.params, None)
 
 
 class ModalAmpParameters(DummyParameterEncoder):
@@ -28,8 +31,8 @@ class ModalAmpParameters(DummyParameterEncoder):
     parameters by a set of learnable parameters. Static per mode amplitude modulation
     """
 
-    def __init__(self, num_modes: int):
-        super().__init__(torch.Size([num_modes]))
+    def __init__(self, num_modes: int, **kwargs):
+        super().__init__(torch.Size([num_modes]), **kwargs)
 
     def forward(
         self,
@@ -48,7 +51,7 @@ class ModalAmpParameters(DummyParameterEncoder):
 
         params[1] = params[1] * amp_mod
 
-        return torch.stack(params, dim=1)
+        return (torch.stack(params, dim=1), None)
 
 
 class NoiseParameters(torch.nn.Module):
