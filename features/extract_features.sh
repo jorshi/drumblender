@@ -13,3 +13,16 @@ do
         done
     done
 done
+
+# Run for random weights too
+
+for model in rnd_weights
+do
+    for instrument in kick snare tom hihat cymbals percussion clap
+    do
+        for sampletype in a e
+        do
+            drumblender-film --data ./cfg/data/filtered/percussion_${sampletype}_${instrument}.yaml --split test ./pretrained/${model}.yaml random ./features/${model}_percussion_${sampletype}_${instrument}.pt
+        done
+    done
+done

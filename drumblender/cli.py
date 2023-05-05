@@ -16,6 +16,7 @@ import drumblender.utils.data as data_utils
 import drumblender.utils.model as model_utils
 from drumblender.callbacks import SaveConfigCallbackWanb
 from drumblender.data import AudioDataModule
+from drumblender.models.soundstream import SoundStreamAttentionEncoder
 
 
 def run_cli():
@@ -160,7 +161,7 @@ def export_film_embeddings():
     parser.add_argument(
         "checkpoint",
         type=str,
-        help="Path to a checkpoint file.",
+        help="Path to a checkpoint file. Use [random] for random weights.",
     )
     parser.add_argument(
         "outdir",
@@ -184,9 +185,21 @@ def export_film_embeddings():
 
     # Load the model and datamodule
     include_data = args.data is None
-    model, datamodule = model_utils.load_model(
-        args.config, args.checkpoint, include_data=include_data
-    )
+
+    if args.checkpoint == "random":
+        print("[INFO] Loading random weights.")
+        model = SoundStreamAttentionEncoder(
+            input_channels=1,
+            hidden_channels=16,
+            output_channels=128,
+            strides=[2, 2, 4, 8],
+            causal=False,
+            transpose_output=False,
+        )
+    else:
+        model, datamodule = model_utils.load_model(
+            args.config, args.checkpoint, include_data=include_data
+        )
 
     # If a different dataset is specified, load it here.
     if args.data is not None:
@@ -207,7 +220,12 @@ def export_film_embeddings():
             # Get dataset item and extract FiLM embedding, save to outdir.
             example = dataset[i]
             original = example[0].to(device).unsqueeze(0)
-            transient_params = model.transient_autoencoder(original)
+
+            if args.checkpoint == "random":
+                transient_params = model(original)
+            else:
+                transient_params = model.transient_autoencoder(original)
+
             param_list.append(transient_params.to("cpu").clone())
 
         params = torch.cat(param_list, dim=0)
