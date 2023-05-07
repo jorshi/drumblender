@@ -102,3 +102,57 @@ class MFCCError(Metric):
 
     def compute(self) -> torch.Tensor:
         return self.mfcc / self.count
+
+
+class SpectralFluxOnsetError(Metric):
+    """
+    Error between spectral flux onset signals
+    """
+
+    full_state_update = False
+
+    def __init__(self, n_fft=1024, hop_size=64, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.add_state("error", default=torch.tensor(0.0), dist_reduce_fx="sum")
+        self.add_state("count", default=torch.tensor(0), dist_reduce_fx="sum")
+        self.n_fft = n_fft
+        self.hop_size = hop_size
+
+    def _onset_signal(self, x: torch.Tensor) -> torch.Tensor:
+        assert x.dim() == 3, "Input must be of shape (batch, channels, length)"
+        assert x.shape[1] == 1, "Input must be mono"
+
+        x = x.squeeze(1)
+        X = torch.stft(
+            x,
+            n_fft=self.n_fft,
+            hop_length=self.hop_size,
+            window=torch.hann_window(self.n_fft, device=x.device),
+            return_complex=True,
+            pad_mode="constant",
+            normalized=False,
+            onesided=True,
+        )
+        # L2-norm on the rectified difference of the magnitude spectrogram
+        flux = torch.diff(torch.abs(X), dim=1)
+        flux = (flux + torch.abs(flux)) / 2
+        flux = torch.square(flux)
+        flux = torch.sum(flux, dim=1)
+
+        return flux
+
+    def update(self, x: torch.Tensor, y: torch.Tensor) -> None:
+        assert x.shape == y.shape
+        assert x.ndim == 3 and x.shape[1] == 1, "Only mono audio is supported"
+
+        x = self._onset_signal(x)
+        y = self._onset_signal(y)
+
+        # MAE
+        onset_error = torch.mean(torch.abs(x - y), dim=-1)
+
+        self.error += torch.sum(onset_error)
+        self.count += onset_error.shape[0]
+
+    def compute(self) -> torch.Tensor:
+        return self.error / self.count

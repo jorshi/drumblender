@@ -25,7 +25,5 @@ init_args:
     parameter_key: feature_file
     split_strategy: sample_pack
     expected_num_modes: 64
-    sample_types:
-      - electronic
     instruments:
-      - percussion
+      - snare

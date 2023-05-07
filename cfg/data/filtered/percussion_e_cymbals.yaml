@@ -28,4 +28,5 @@ init_args:
     sample_types:
       - electronic
     instruments:
+      - hihat
       - cymbals

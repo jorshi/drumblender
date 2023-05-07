@@ -28,4 +28,5 @@ init_args:
     sample_types:
       - acoustic
     instruments:
+      - hihat
       - cymbals
