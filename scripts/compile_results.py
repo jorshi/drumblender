@@ -109,7 +109,14 @@ def main(arguments):
 
     df = pd.concat(rows, ignore_index=True)
 
-    float_format = lambda x: "%.2f" % x if x < 10 else "%.1f" % x  # noqa: E731
+    def float_format(x):
+        if x < 10 and x > 0.1:
+            return "%.2f" % x
+        elif x < 0.1:
+            return "%.3f" % x
+        else:
+            return "%.1f" % x
+
     df.to_latex(args.outfile, index=False, float_format=float_format)
 
 
