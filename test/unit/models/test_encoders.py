@@ -3,6 +3,7 @@ import torch
 from drumblender.models.encoders import AutoEncoder
 from drumblender.models.encoders import DummyParameterEncoder
 from drumblender.models.encoders import ModalAmpParameters
+from drumblender.models.encoders import VariationalEncoder
 
 
 def test_dummy_parameter_encoder_can_be_instantiated():
@@ -77,3 +78,16 @@ def test_autoencoder_can_forward_with_latent(mocker):
 
     encoder_spy.assert_called_once_with(x)
     decoder_spy.assert_called_once_with(latent)
+
+
+def test_variational_encoder_yields_correct_sizes():
+    batch_size = 16
+    distr_len = 1024
+    encoder = DummyParameterEncoder((batch_size, distr_len))
+    variational_encoder = VariationalEncoder(encoder)
+
+    z = variational_encoder(torch.rand(1, 1))
+    sampled_z, kl = variational_encoder.reparametrize(z)
+    assert sampled_z.shape[0] == batch_size
+    assert sampled_z.shape[1] == distr_len // 2
+    assert len(kl.shape) == 0
