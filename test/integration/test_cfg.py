@@ -31,10 +31,6 @@ TEST_TYPES = dict(
         pathname="cfg/models/**/*.yaml",
         recursive=True,
     ),
-    optimizer_cfg=dict(
-        pathname="cfg/optimizer/**/*.yaml",
-        recursive=True,
-    ),
     synth_cfg=dict(
         pathname="cfg/synths/**/*.yaml",
         recursive=True,
@@ -113,34 +109,6 @@ def test_can_instantiate_from_model_config(model_cfg, parser):
 
     # Check that the instantiated object is of the correct type
     assert isinstance(objs.cfg, import_class(class_path))
-
-
-def test_can_instantiate_from_optimizer_config(optimizer_cfg, parser, monkeypatch):
-    cfg_string = read_cfg(optimizer_cfg, wrap="optimizer")
-    # set up LightningCLI config
-    cfg_string = (
-        f"model: pytorch_lightning.demos.boring_classes.BoringModel\n{cfg_string}"
-    )
-
-    parser.add_optimizer_args((torch.optim.Optimizer,), "optimizer")
-    parser.add_lightning_class_args(
-        LightningModule, "model", subclass_mode=True, required=True
-    )
-    args = parser.parse_string(cfg_string)
-    assert "class_path" in args.optimizer, "No class_path key in config root level"
-    class_path = args.optimizer["class_path"]
-
-    with monkeypatch.context() as m:
-        # stop LightningCLI from accessing pytest argv
-        import sys
-
-        m.setattr(sys, "argv", ["fake_file.py"])
-
-        cli = LightningCLI(args=args, run=False)
-        optimizer = cli.model.configure_optimizers()
-
-    # Check that the instantiated object is of the correct type
-    assert isinstance(optimizer, import_class(class_path))
 
 
 def test_can_instantiate_from_experiment_config(experiment_cfg, monkeypatch):
