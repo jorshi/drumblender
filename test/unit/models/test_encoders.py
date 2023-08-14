@@ -13,7 +13,7 @@ def test_dummy_parameter_encoder_can_be_instantiated():
 
 def test_dummy_parameter_encoder_can_forward():
     model = DummyParameterEncoder((1, 1))
-    output = model(torch.rand(1, 1))
+    output, _ = model(torch.rand(1, 1))
     assert output.shape == (1, 1)
     assert output.requires_grad
 
@@ -28,7 +28,7 @@ def test_modal_amp_parameters_can_forward():
     # May receive a batch of modal parameters with a different number of modes
     model = ModalAmpParameters(num_modes + 10)
 
-    output = model(None, fake_modal_params)
+    output, _ = model(None, fake_modal_params)
     assert output.shape == (batch_size, num_params, num_modes, num_steps)
 
 

@@ -55,7 +55,7 @@ class VariationalEncoder(torch.nn.Module):
         self.warmed_up = state
 
     def forward(self, x: torch.Tensor):
-        z = self.encoder(x)
+        z, _ = self.encoder(x)
         if self.warmed_up:
             z = z.detach()
         return z
