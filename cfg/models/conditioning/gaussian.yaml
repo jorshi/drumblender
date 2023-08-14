@@ -1,3 +1,0 @@
-class_path: drumblender.models.conditioning.GaussianConditioning
-init_args:
-  output_channels: 32

@@ -1,7 +1,0 @@
-class_path: drumblender.models.MLP
-init_args:
-  input_size: 2
-  hidden_size: 32
-  output_size: 1
-  hidden_layers: 10
-  activation: LeakyReLU
