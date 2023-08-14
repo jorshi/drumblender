@@ -112,6 +112,9 @@ def dataset():
 
 
 def verify_dataset(datamodule: LightningDataModule):
+    """
+    Verify that all files in the dataset are present.
+    """
     for split in ["fit", "validate", "test"]:
         datamodule.setup(split)
         if split == "fit":

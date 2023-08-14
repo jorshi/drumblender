@@ -30,7 +30,7 @@ class LogAudioCallback(Callback):
         save_audio_sr: int = 48000,
         n_batches: int = 1,
         log_on_epoch_end: bool = False,
-        max_audio_samples: int = 8,
+        max_audio_samples: int = 8,  # Limit the number of samples logged to W&B
     ):
         self.on_train = on_train
         self.on_val = on_val
