@@ -22,8 +22,10 @@ def main(arguments):
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
-    parser.add_argument("indir", help="Input dir", type=str)
-    parser.add_argument("source", help="Source", type=str)
+    parser.add_argument(
+        "indir", help="Input dir -- root log dir for metric csvs", type=str
+    )
+    parser.add_argument("type", help="Table type: ['all', 'instrument']", type=str)
     parser.add_argument(
         "-o",
         "--outfile",
@@ -51,21 +53,15 @@ def main(arguments):
                 _, split = model_name.split(model)
                 split = split[1:]
 
-                if split.startswith("a_"):
+                sub_df["instrument"] = "all"
+                if split == "a":
                     sub_df["source"] = "acoustic"
-                elif split.startswith("e_"):
+                elif split == "e":
                     sub_df["source"] = "electronic"
+                elif split == "all":
+                    sub_df["source"] = "all"
                 else:
-                    sub_df["instrument"] = "all"
-
-                instrument = split.split("_")
-                if len(instrument) > 1:
-                    sub_df["instrument"] = instrument[1]
-                elif instrument[0] == "a":
-                    sub_df["source"] = "acoustic"
-                elif instrument[0] == "e":
-                    sub_df["source"] = "electronic"
-                else:
+                    sub_df["instrument"] = split
                     sub_df["source"] = "all"
 
                 sub_df["model"] = model
@@ -75,11 +71,13 @@ def main(arguments):
     df = pd.concat(rows, ignore_index=True)
     df = df.sort_values(by=["model", "source", "instrument"])
 
-    # filter by source
-    if args.source != "all":
-        df = df[df["source"] == args.source]
-    else:
+    if args.type == "all":
         df = df[df["instrument"] == "all"]
+    elif args.type == "instrument":
+        df = df[df["source"] == "all"]
+        df = df[df["instrument"] != "all"]
+    else:
+        raise ValueError(f"Unknown type {args.type}")
 
     print(df)
 
@@ -90,7 +88,7 @@ def main(arguments):
         model_df = df[df["model"] == model]
         model_row = {"model": [model]}
 
-        if args.source == "all":
+        if args.type == "all":
             for source in ["all", "acoustic", "electronic"]:
                 source_df = model_df[model_df["source"] == source]
                 model_row[source + "_mss"] = [source_df["test/loss"].mean()]
