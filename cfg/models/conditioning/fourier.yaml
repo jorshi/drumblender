@@ -1,5 +1,0 @@
-class_path: drumblender.models.conditioning.RandomFourierFeatureConditioning
-init_args:
-  output_channels: 64
-  freq_scale: 1000
-  trainable: false

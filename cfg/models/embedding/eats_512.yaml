@@ -1,4 +1,0 @@
-class_path: drumblender.models.EAT
-init_args:
-  input_length: 96000
-  embed_dim: 512

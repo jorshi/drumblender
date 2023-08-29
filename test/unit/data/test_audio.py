@@ -7,7 +7,6 @@ import pytest
 import torch
 
 from drumblender.data import AudioDataset
-from drumblender.data import AudioPairWithFeatureDataset
 
 TESTED_MODULE = "drumblender.data.audio"
 TEST_DATA_DIR = "test_data"
@@ -159,48 +158,3 @@ def test_audio_dataset_sample_pack_split_reproducible(
     file_list_b = list(dataset.file_list)
 
     assert file_list_a == file_list_b
-
-
-def test_audio_pair_with_feature_dataset(fs, monkeypatch):
-    # Create a mock dataset
-    fs.create_dir(TEST_DATA_DIR)
-    fs.create_file(Path(TEST_DATA_DIR).joinpath(TEST_META_FILE))
-
-    # Fake loading metadata
-    def fake_load_json(filename):
-        metadata = {}
-        for i in range(100):
-            metadata[i] = {
-                "filename_a": f"kick_a{i}.wav",
-                "filename_b": f"kick_b{i}.wav",
-                "feature_file": f"features/feature_{i}.pt",
-            }
-        return metadata
-
-    monkeypatch.setattr(f"{TESTED_MODULE}.json.load", fake_load_json)
-
-    # Fake loading of audio files
-    def fake_load_audio(filename):
-        return torch.ones(1, TEST_NUM_SAMPLES), TEST_SAMPLE_RATE
-
-    monkeypatch.setattr(f"{TESTED_MODULE}.torchaudio.load", fake_load_audio)
-
-    # Fake loading of feature files
-    def fake_load_feature(filename):
-        return torch.ones(128)
-
-    monkeypatch.setattr(f"{TESTED_MODULE}.torch.load", fake_load_feature)
-
-    dataset = AudioPairWithFeatureDataset(
-        TEST_DATA_DIR,
-        TEST_META_FILE,
-        TEST_SAMPLE_RATE,
-        TEST_NUM_SAMPLES,
-        feature_key="feature_file",
-    )
-
-    assert len(dataset) == 100
-    audio_a, audio_b, feature = dataset[0]
-    assert audio_a.shape == (1, TEST_NUM_SAMPLES)
-    assert audio_b.shape == (1, TEST_NUM_SAMPLES)
-    assert feature.shape == (128,)

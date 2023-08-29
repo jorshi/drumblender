@@ -111,21 +111,6 @@ class GatedActivation(nn.Module):
         return torch.tanh(x1) * torch.sigmoid(x2)
 
 
-class BatchNormProjection(nn.Module):
-    """ """
-
-    def __init__(self, in_features: int, out_features: int):
-        super().__init__()
-        self.net = nn.Sequential(
-            nn.BatchNorm1d(in_features),
-            nn.Linear(in_features, out_features, bias=False),
-        )
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.net(x)
-        return x
-
-
 class AttentionPooling(nn.Module):
     def __init__(self, in_features: int, keep_seq_dim: bool = False):
         super().__init__()

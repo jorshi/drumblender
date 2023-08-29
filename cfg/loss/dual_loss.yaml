@@ -1,8 +1,0 @@
-class_path: drumblender.loss.WeightedLoss
-init_args:
-  loss_fns:
-    - class_path: torch.nn.L1Loss
-      init_args:
-        reduction: mean
-    - class_path: auraloss.freq.MultiResolutionSTFTLoss
-  weights: [1.0, 1.0]
