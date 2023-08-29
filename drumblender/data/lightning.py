@@ -200,7 +200,8 @@ class AudioDataModule(pl.LightningDataModule):
             if len(file_metadata) == 0:
                 file_metadata = [{}] * len(files)
 
-            for file, file_meta in zip(files, file_metadata, strict=True):
+            assert len(files) == len(file_metadata), "File and metadata length mismatch"
+            for file, file_meta in zip(files, file_metadata):
                 # Create a hashed name for the file based on its path
                 # minus the root directory
                 output_hash = data_utils.str2int(str(Path(*file.parts[1:])))

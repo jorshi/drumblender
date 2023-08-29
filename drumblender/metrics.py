@@ -72,7 +72,7 @@ class MFCCError(Metric):
         n_mfcc: int = 40,
         n_fft: int = 2048,
         hop_length: int = 128,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         super().__init__(**kwargs)
         self.add_state("mfcc", default=torch.tensor(0.0), dist_reduce_fx="sum")
