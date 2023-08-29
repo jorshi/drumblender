@@ -1,17 +1,8 @@
-drumblender test -c eval/$1.yaml --ckpt_path eval/$1.ckpt --trainer.logger CSVLogger --trainer.logger.name $1"_e_cymbals" --model.test_metrics cfg/metrics/drumblender_metrics.yaml --data cfg/data/filtered/percussion_e_cymbals.yaml
+drumblender test -c $1/$2.yaml --ckpt_path $1/$2.ckpt --trainer.logger CSVLogger --trainer.logger.name $2"_cymbals" --model.test_metrics cfg/metrics/drumblender_metrics.yaml --data cfg/data/filtered/percussion_cymbals.yaml
 rm logs/config.yaml
-drumblender test -c eval/$1.yaml --ckpt_path eval/$1.ckpt --trainer.logger CSVLogger --trainer.logger.name $1"_e_kick" --model.test_metrics cfg/metrics/drumblender_metrics.yaml --data cfg/data/filtered/percussion_e_kick.yaml
+drumblender test -c $1/$2.yaml --ckpt_path $1/$2.ckpt --trainer.logger CSVLogger --trainer.logger.name $2"_kick" --model.test_metrics cfg/metrics/drumblender_metrics.yaml --data cfg/data/filtered/percussion_kick.yaml
 rm logs/config.yaml
-drumblender test -c eval/$1.yaml --ckpt_path eval/$1.ckpt --trainer.logger CSVLogger --trainer.logger.name $1"_e_snare" --model.test_metrics cfg/metrics/drumblender_metrics.yaml --data cfg/data/filtered/percussion_e_snare.yaml
+drumblender test -c $1/$2.yaml --ckpt_path $1/$2.ckpt --trainer.logger CSVLogger --trainer.logger.name $2"_snare" --model.test_metrics cfg/metrics/drumblender_metrics.yaml --data cfg/data/filtered/percussion_snare.yaml
 rm logs/config.yaml
-drumblender test -c eval/$1.yaml --ckpt_path eval/$1.ckpt --trainer.logger CSVLogger --trainer.logger.name $1"_e_tom" --model.test_metrics cfg/metrics/drumblender_metrics.yaml --data cfg/data/filtered/percussion_e_tom.yaml
-rm logs/config.yaml
-
-drumblender test -c eval/$1.yaml --ckpt_path eval/$1.ckpt --trainer.logger CSVLogger --trainer.logger.name $1"_a_cymbals" --model.test_metrics cfg/metrics/drumblender_metrics.yaml --data cfg/data/filtered/percussion_a_cymbals.yaml
-rm logs/config.yaml
-drumblender test -c eval/$1.yaml --ckpt_path eval/$1.ckpt --trainer.logger CSVLogger --trainer.logger.name $1"_a_kick" --model.test_metrics cfg/metrics/drumblender_metrics.yaml --data cfg/data/filtered/percussion_a_kick.yaml
-rm logs/config.yaml
-drumblender test -c eval/$1.yaml --ckpt_path eval/$1.ckpt --trainer.logger CSVLogger --trainer.logger.name $1"_a_snare" --model.test_metrics cfg/metrics/drumblender_metrics.yaml --data cfg/data/filtered/percussion_a_snare.yaml
-rm logs/config.yaml
-drumblender test -c eval/$1.yaml --ckpt_path eval/$1.ckpt --trainer.logger CSVLogger --trainer.logger.name $1"_a_tom" --model.test_metrics cfg/metrics/drumblender_metrics.yaml --data cfg/data/filtered/percussion_a_tom.yaml
+drumblender test -c $1/$2.yaml --ckpt_path $1/$2.ckpt --trainer.logger CSVLogger --trainer.logger.name $2"_tom" --model.test_metrics cfg/metrics/drumblender_metrics.yaml --data cfg/data/filtered/percussion_tom.yaml
 rm logs/config.yaml
