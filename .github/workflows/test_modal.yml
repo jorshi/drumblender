@@ -11,13 +11,16 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10"]
+    name: Python Tests with Modal
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.10
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: ${{ matrix.python-version }}
           cache: "pip" # cache pip dependencies
           cache-dependency-path: "**/pyproject.toml" # cache dependencies based on pyproject.toml
       - name: Install dependencies
