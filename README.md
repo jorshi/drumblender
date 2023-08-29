@@ -62,6 +62,7 @@ Save ID and key in a `.env` file in the project root:
 ```bash
 CLOUDFLARE_ACCESS_KEY_ID=xxxx
 CLOUDFLARE_ACCESS_SECRET_KEY=xxxx
+```
 
 ## Reproducibility
 Experiments were run using
