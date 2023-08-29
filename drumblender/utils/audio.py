@@ -8,7 +8,6 @@ from typing import Union
 import numpy as np
 import torch
 import torchaudio
-from einops import rearrange
 from einops import repeat
 
 
@@ -84,42 +83,6 @@ def generate_sine_wave(
     x = torch.sin(frequency * 2 * torch.pi * n / sample_rate)
     x = repeat(x, "n -> c n", c=2 if stereo else 1)
     return x
-
-
-def modal_synth(
-    freqs: torch.Tensor,
-    amps: torch.Tensor,
-    num_samples: int,
-) -> torch.Tensor:
-    """
-    Synthesizes a modal signal from a set of frequencies, phases, and amplitudes.
-
-    Args:
-        freqs: A 3D tensor of frequencies in angular frequency of shape
-            (batch_size, num_modes, num_frames)
-        amps: A 3D tensor of amplitudes of shape (batch_size, num_modes, num_frames)
-        sample_rate: Sample rate of the output signal
-        num_samples: Number of samples in the output signal
-    """
-    (batch_size, num_modes, num_frames) = freqs.shape
-    assert freqs.shape == amps.shape
-
-    # Interpolate the frequencies and amplitudes
-    w = torch.nn.functional.interpolate(freqs, size=num_samples, mode="linear")
-    a = torch.nn.functional.interpolate(amps, size=num_samples, mode="linear")
-
-    a = rearrange(a, "b m n -> (b m) n")
-    w = rearrange(w, "b m n -> (b m) n")
-    phase_env = torch.cumsum(w, dim=1)
-
-    # Generate the modal signal
-    y = a * torch.sin(phase_env)
-    y = rearrange(y, "(b m) n -> b m n", b=batch_size, m=num_modes)
-
-    # Sum the modes
-    y = torch.sum(y, dim=1)
-
-    return y
 
 
 def first_non_silent_sample(

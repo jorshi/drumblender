@@ -235,21 +235,26 @@ def get_files_from_folders(
         pattern (str): The pattern to search for. E.g. "*.wav"
     """
     file_list = []
+    file_metadata = []
 
     # If the folders are a dictionary, get the list of folders from the values
     if isinstance(folders, dict):
-        item_folders = []
         for _, val in folders.items():
-            item_folders.append(val["path"])
+            # Get the metadata for the folder (everything except the path)
+            folder_metadata = {k: v for k, v in val.items() if k != "path"}
 
-        folder_files = get_files_from_folders(basedir, item_folders, pattern)
-        file_list.extend(folder_files)
+            # Get the files in the folder
+            folder_files, _ = get_files_from_folders(basedir, [val["path"]], pattern)
+
+            # Add the metadata and files to the list
+            file_metadata.extend([folder_metadata] * len(folder_files))
+            file_list.extend(folder_files)
 
     elif isinstance(folders, list):
         for folder in folders:
             file_list.extend(Path(basedir).joinpath(folder).rglob(pattern))
 
-    return file_list
+    return file_list, file_metadata
 
 
 def create_tarfile(output_file: str, source_dir: str):

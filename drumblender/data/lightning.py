@@ -191,12 +191,17 @@ class AudioDataModule(pl.LightningDataModule):
         for key, item in tqdm(metadata.items()):
             sample_type = item["type"]
             folders = item["folders"]
-            files = data_utils.get_files_from_folders(
+            files, file_metadata = data_utils.get_files_from_folders(
                 self.data_dir_unprocessed, folders, "*.wav"
             )
             assert len(files) > 0, f"No files founds in folders: {folders}"
 
-            for file in files:
+            # If there is no metadata for the files, create an empty dict
+            if len(file_metadata) == 0:
+                file_metadata = [{}] * len(files)
+
+            assert len(files) == len(file_metadata), "File and metadata length mismatch"
+            for file, file_meta in zip(files, file_metadata):
                 # Create a hashed name for the file based on its path
                 # minus the root directory
                 output_hash = data_utils.str2int(str(Path(*file.parts[1:])))
@@ -219,6 +224,7 @@ class AudioDataModule(pl.LightningDataModule):
                     "filename": str(output_file.relative_to(self.data_dir)),
                     "type": sample_type,
                     "sample_pack_key": key,
+                    **file_meta,
                 }
 
         # Save the new metadata
@@ -382,6 +388,7 @@ class ModalDataModule(AudioDataModule):
                     modal_freqs,
                     modal_amps,
                     self.num_samples,
+                    modal_phases,
                 )
                 modal_audio_file = audio_file.parent.joinpath(
                     audio_file.name.replace(".wav", "_modal.wav")

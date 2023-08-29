@@ -1,7 +1,6 @@
 import pytest
 import torch
 
-from drumblender.models import KickTCN
 from drumblender.models import TCN
 from drumblender.models.components import Pad
 
@@ -219,32 +218,6 @@ def test_tcn_throws_error_if_film_conditioning_requested_without_embedding_size(
         )
 
 
-def test_kick_tcn_use_deterministic_noise_false(mocker):
-    batch_size = 4
-    channels = 1
-    seq_len = 16
-
-    net = KickTCN(
-        transient=TCN(in_channels=1, hidden_channels=1, out_channels=1),
-        sustain=TCN(in_channels=1, hidden_channels=1, out_channels=1),
-        fusion=TCN(in_channels=2, hidden_channels=1, out_channels=1),
-        transient_length=16,
-        use_deterministic_noise=False,
-    )
-    assert net.use_deterministic_noise is False
-    assert hasattr(net, "noise") is False
-
-    # Make sure this forwards correctly with no noise buffer and that
-    # torech.randn_like is called
-    spy = mocker.spy(torch, "randn_like")
-    x = torch.testing.make_tensor(
-        batch_size, channels, seq_len, device="cpu", dtype=torch.float32
-    )
-    y = net(x)
-    assert y.shape == (batch_size, channels, seq_len)
-    spy.assert_called_once()
-
-
 def test_can_use_tfilm_in_tcn(mocker):
     import drumblender.models.tcn
 
@@ -294,40 +267,3 @@ def test_tcn_throws_if_tfilm_requested_without_block_size():
             causal=True,
             use_temporal_film=True,
         )
-
-
-def test_kick_tcn_correctly_forwards_input(mocker):
-    import drumblender.models.tcn
-
-    batch_size = 4
-    channels = 1
-    seq_len = 16
-
-    spy = mocker.spy(drumblender.models.tcn.TCN, "__call__")
-
-    net = KickTCN(
-        transient=TCN(in_channels=1, hidden_channels=1, out_channels=1),
-        sustain=TCN(in_channels=1, hidden_channels=1, out_channels=1),
-        fusion=TCN(in_channels=2, hidden_channels=1, out_channels=1),
-        transient_length=16,
-    )
-
-    x = torch.testing.make_tensor(
-        batch_size, channels, seq_len, device="cpu", dtype=torch.float32
-    )
-    y = net(x)
-
-    assert y.shape == (batch_size, channels, seq_len)
-    assert spy.call_count == 3
-
-
-def test_kick_tcn_use_deterministic_noise_true(mocker):
-    net = KickTCN(
-        transient=TCN(in_channels=1, hidden_channels=1, out_channels=1),
-        sustain=TCN(in_channels=1, hidden_channels=1, out_channels=1),
-        fusion=TCN(in_channels=2, hidden_channels=1, out_channels=1),
-        transient_length=16,
-        use_deterministic_noise=True,
-    )
-    assert net.use_deterministic_noise
-    assert net.noise.shape == (1, 16)

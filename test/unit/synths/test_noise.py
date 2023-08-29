@@ -20,4 +20,4 @@ def test_noise_generator_produces_correct_output_size(noise_gen):
     x = torch.rand(batch_size, frame_length, num_filters)
 
     y = noise_gen(x)
-    assert y.shape == (batch_size, hop_size * (frame_length - 1))
+    assert y.shape == (batch_size, hop_size * (frame_length - 1) + (hop_size * 2))

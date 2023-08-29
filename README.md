@@ -1,6 +1,7 @@
 # Drum Blender
 
-## Install 
+## Install
+Requires Python version 3.9 or greater
 
 To install with development dependencies:
 
@@ -10,7 +11,7 @@ $ pip install -e ".[dev]"
 
 Install pre-commit hooks if developing and contributing:
 
-```bach
+```bash
 $ pre-commit install
 ```
 
@@ -61,3 +62,13 @@ Save ID and key in a `.env` file in the project root:
 ```bash
 CLOUDFLARE_ACCESS_KEY_ID=xxxx
 CLOUDFLARE_ACCESS_SECRET_KEY=xxxx
+```
+
+## Reproducibility
+Experiments were run using
+
+- Python version: 3.10.10.
+- GPU: Tesla V100-PCIE-16GB
+
+The exact Python packages in the environment during model training are in
+`train-packages.txt`.

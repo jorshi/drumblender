@@ -1,0 +1,63 @@
+class_path: torch.nn.ModuleDict
+init_args:
+  modules:
+    lsd:
+      class_path: drumblender.metrics.LogSpectralDistance
+    flux_onset:
+      class_path: drumblender.metrics.SpectralFluxOnsetError
+    mss_sc:
+      class_path: auraloss.freq.MultiResolutionSTFTLoss
+      init_args:
+        fft_sizes:
+        - 1024
+        - 2048
+        - 512
+        hop_sizes:
+        - 120
+        - 240
+        - 50
+        win_lengths:
+        - 600
+        - 1200
+        - 240
+        window: hann_window
+        w_sc: 1.0
+        w_log_mag: 0.0
+        w_lin_mag: 0.0
+        w_phs: 0.0
+        sample_rate: null
+        scale: null
+        n_bins: null
+        scale_invariance: false
+        eps: 1.0e-08
+        output: loss
+        reduction: mean
+        device: null
+    mss_log:
+      class_path: auraloss.freq.MultiResolutionSTFTLoss
+      init_args:
+        fft_sizes:
+        - 1024
+        - 2048
+        - 512
+        hop_sizes:
+        - 120
+        - 240
+        - 50
+        win_lengths:
+        - 600
+        - 1200
+        - 240
+        window: hann_window
+        w_sc: 0.0
+        w_log_mag: 1.0
+        w_lin_mag: 0.0
+        w_phs: 0.0
+        sample_rate: null
+        scale: null
+        n_bins: null
+        scale_invariance: false
+        eps: 1.0e-08
+        output: loss
+        reduction: mean
+        device: null

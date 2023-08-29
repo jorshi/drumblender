@@ -1,3 +1,0 @@
-class_path: L1Loss
-init_args:
-  reduction: mean

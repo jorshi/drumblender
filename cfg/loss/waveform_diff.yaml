@@ -1,3 +1,0 @@
-class_path: drumblender.loss.FirstOrderDifferenceLoss
-init_args:
-  reduction: mean

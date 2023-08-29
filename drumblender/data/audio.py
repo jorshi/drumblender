@@ -49,6 +49,7 @@ class AudioDataset(Dataset):
         split_strategy: Literal["sample_pack", "random"] = "random",
         normalize: bool = False,
         sample_types: Optional[List[str]] = None,
+        instruments: Optional[List[str]] = None,
     ):
         super().__init__()
         self.data_dir = Path(data_dir)
@@ -58,6 +59,7 @@ class AudioDataset(Dataset):
         self.seed = seed
         self.normalize = normalize
         self.sample_types = sample_types
+        self.instruments = instruments
 
         # Confirm that preprocessed dataset exists
         if not self.data_dir.exists():
@@ -102,6 +104,15 @@ class AudioDataset(Dataset):
     def _sample_pack_split(
         self, split: str, test_size: float = 0.1, val_size: float = 0.1
     ):
+        split_metadata = self._sample_pack_split_metadata(split, test_size, val_size)
+
+        # Convert to list for file list
+        self.file_list = split_metadata.index.tolist()
+        log.info(f"Number of samples in {split} set: {len(self.file_list)}")
+
+    def _sample_pack_split_metadata(
+        self, split: str, test_size: float = 0.1, val_size: float = 0.1
+    ):
         """
         Split the dataset into train, validation, and test sets. This creates splits
         that are disjont with respect to sample packs and have same the proportion of
@@ -118,7 +129,7 @@ class AudioDataset(Dataset):
 
         # Count the number of samples in each type (e.g. electric, acoustic)
         data_types = data.groupby("type").size().reset_index(name="counts")
-        log.info(f"Number of samples by type:\n {data_types}")
+        # log.info(f"Number of samples by type:\n {data_types}")
 
         # Filter by sample types
         if self.sample_types is not None:
@@ -163,8 +174,25 @@ class AudioDataset(Dataset):
         splits["percent"] = splits["counts"] / splits["counts"].sum()
         log.info(f"Split counts:\n{splits}")
 
-        # Set the file list based on the split
-        self.file_list = data[data["split"] == split].index.tolist()
+        # Filter by instrument types if specified
+        if "instrument" in data.columns:
+            log.info(f"Insrumens in dataset: {data['instrument'].unique()}")
+            if self.instruments is not None:
+                log.info(f"Filtering by instruments: {self.instruments}")
+                data = data[data["instrument"].isin(self.instruments)]
+
+        # Filter by split
+        data = data[data["split"] == split]
+
+        # Logging
+        data_types = data.groupby("type").size().reset_index(name="counts")
+        log.info(f"Number of samples by type:\n {data_types}")
+
+        if "instrument" in data.columns:
+            inst_types = data.groupby("instrument").size().reset_index(name="counts")
+            log.info(f"Number of samples by instrument:\n {inst_types}")
+
+        return data
 
     def _random_split(self, split: str):
         """
@@ -196,114 +224,6 @@ class AudioDataset(Dataset):
             self.file_list = splits[2]
 
 
-class AudioPairDataset(AudioDataset):
-    """
-    Dataset of audio pairs.
-
-    Args:
-        data_dir: Path to the directory containing the dataset.
-        meta_file: Name of the json metadata file.
-        sample_rate: Expected sample rate of the audio files.
-        num_samples: Expected number of samples in the audio files.
-        file_key_a: Key in the metadata file for the first audio file in a pair.
-        file_key_b: Key in the metadata file for the second audio file in a pair.
-        split (optional): Split to return. Must be one of 'train', 'val', or 'test'.
-            If None, the entire dataset is returned.
-        seed: Seed for random number generator used to split the dataset.
-    """
-
-    def __init__(
-        self,
-        data_dir: Union[str, Path],
-        meta_file: str,
-        sample_rate: int,
-        num_samples: int,
-        file_key_a: str = "filename_a",
-        file_key_b: str = "filename_b",
-        split: Optional[str] = None,
-        seed: int = 42,
-    ):
-        super().__init__(
-            data_dir=data_dir,
-            meta_file=meta_file,
-            sample_rate=sample_rate,
-            num_samples=num_samples,
-            split=split,
-            seed=seed,
-        )
-        self.file_key_a = file_key_a
-        self.file_key_b = file_key_b
-
-    def __getitem__(self, idx):
-        """
-        Returns a tuple of audio samples.
-        """
-        audio_filename = self.metadata[self.file_list[idx]][self.file_key_a]
-        waveform_a, sr_a = torchaudio.load(self.data_dir.joinpath(audio_filename))
-
-        audio_filename = self.metadata[self.file_list[idx]][self.file_key_b]
-        waveform_b, sr_b = torchaudio.load(self.data_dir.joinpath(audio_filename))
-
-        # Confirm sample rate and shape
-        assert sr_a == self.sample_rate, "Sample rate mismatch."
-        assert waveform_a.shape == (1, self.num_samples), "Incorrect input audio shape."
-        assert sr_b == self.sample_rate, "Sample rate mismatch."
-        assert waveform_b.shape == (1, self.num_samples), "Incorrect input audio shape."
-
-        return waveform_a, waveform_b
-
-
-class AudioPairKroneckerDeltaDataset(AudioPairDataset):
-    """
-    Dataset of audio pairs with an impulse as the second audio file in the pair.
-    Mainly used for testing a model's ability to reconstruct an impulse response.
-    """
-
-    def __getitem__(self, idx):
-        waveform_a, waveform_b = super().__getitem__(idx)
-        dirac = torch.zeros_like(waveform_a)
-        dirac[0, 0] = 1.0
-        return waveform_a, dirac
-
-
-class AudioPairWithFeatureDataset(AudioPairDataset):
-    """
-    Dataset of audio pairs with an additional feature tensor.
-
-    Args:
-        data_dir: Path to the directory containing the dataset.
-        meta_file: Name of the json metadata file.
-        sample_rate: Expected sample rate of the audio files.
-        num_samples: Expected number of samples in the audio files.
-        feature_key: Key in the metadata file for the feature file.
-        **kwargs: Additional arguments to pass to AudioPairDataset.
-    """
-
-    def __init__(
-        self,
-        data_dir: Union[str, Path],
-        meta_file: str,
-        sample_rate: int,
-        num_samples: int,
-        feature_key: str,
-        **kwargs,
-    ):
-        super().__init__(
-            data_dir=data_dir,
-            meta_file=meta_file,
-            sample_rate=sample_rate,
-            num_samples=num_samples,
-            **kwargs,
-        )
-        self.feature_key = feature_key
-
-    def __getitem__(self, idx):
-        waveform_a, waveform_b = super().__getitem__(idx)
-        feature_file = self.metadata[self.file_list[idx]][self.feature_key]
-        feature = torch.load(self.data_dir.joinpath(feature_file))
-        return waveform_a, waveform_b, feature
-
-
 class AudioWithParametersDataset(AudioDataset):
     """
     Dataset of audio pairs with an additional parameter tensor
@@ -324,6 +244,7 @@ class AudioWithParametersDataset(AudioDataset):
         sample_rate: int,
         num_samples: int,
         parameter_key: str,
+        expected_num_modes: Optional[int] = None,
         **kwargs,
     ):
         super().__init__(
@@ -334,9 +255,25 @@ class AudioWithParametersDataset(AudioDataset):
             **kwargs,
         )
         self.parameter_key = parameter_key
+        self.expected_num_modes = expected_num_modes
 
     def __getitem__(self, idx):
         (waveform_a,) = super().__getitem__(idx)
         feature_file = self.metadata[self.file_list[idx]][self.parameter_key]
         feature = torch.load(self.data_dir.joinpath(feature_file))
+
+        # Pad with zeros if the number of modes is less than expected
+        if (
+            self.expected_num_modes is not None
+            and feature.shape[1] != self.expected_num_modes
+        ):
+            null_features = torch.zeros(
+                (
+                    feature.shape[0],
+                    self.expected_num_modes - feature.shape[1],
+                    feature.shape[2],
+                )
+            )
+            feature = torch.cat((feature, null_features), dim=1)
+
         return waveform_a, feature

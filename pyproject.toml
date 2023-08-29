@@ -8,19 +8,20 @@ packages = ["drumblender"]
 [project]
 name = "drumblender"
 version = "0.0.1"
+requires-python = ">=3.9"
 dependencies = [
     "auraloss",
     "boto3",
     "einops",
+    "numpy",
+    "pandas",
+    "python-dotenv",
+    "pytorch_lightning[extra] ~= 1.9.0",
+    "soundfile",
     "torch ~= 1.13",
     "torchaudio ~= 0.13",
-    "pytorch_lightning[extra] ~= 1.9.0",
     "tqdm",
     "wandb",
-    "python-dotenv",
-    "PyWavelets",
-    "soundfile",
-    "pandas",
 ]
 
 [project.scripts]
@@ -30,4 +31,3 @@ drumblender-dataset = "drumblender.cli:dataset"
 [project.optional-dependencies]
 dev = ["black", "flake8", "pytest", "pytest-mock", "pyfakefs", "pre-commit", "pytest-cov"]
 modal = ["nnAudio", "numpy<1.24"]
-openl3 = ["openl3"]

@@ -57,6 +57,7 @@ def test_drumblender_forwards_all(mocker):
     num_modes = 45
     num_steps = 400
     embedding_size = 12
+    latent_size = 3
 
     loss_fn = mocker.stub("loss_fn")
 
@@ -65,15 +66,24 @@ def test_drumblender_forwards_all(mocker):
     encoder = FakeModule(expected_encoder_output)
     encoder_spy = mocker.spy(encoder, "forward")
 
-    expected_modal_encoder_output = torch.rand(batch_size, embedding_size)
+    expected_modal_encoder_output = (
+        torch.rand(batch_size, embedding_size),
+        torch.rand(batch_size, latent_size),
+    )
     modal_encoder = FakeModule(expected_modal_encoder_output)
     modal_encoder_spy = mocker.spy(modal_encoder, "forward")
 
-    expected_noise_encoder_output = torch.rand(batch_size, embedding_size)
+    expected_noise_encoder_output = (
+        torch.rand(batch_size, embedding_size),
+        torch.rand(batch_size, latent_size),
+    )
     noise_encoder = FakeModule(expected_noise_encoder_output)
     noise_encoder_spy = mocker.spy(noise_encoder, "forward")
 
-    expected_transient_encoder_output = torch.rand(batch_size, embedding_size)
+    expected_transient_encoder_output = (
+        torch.rand(batch_size, embedding_size),
+        torch.rand(batch_size, latent_size),
+    )
     transient_encoder = FakeModule(expected_transient_encoder_output)
     transient_encoder_spy = mocker.spy(transient_encoder, "forward")
 
@@ -102,25 +112,26 @@ def test_drumblender_forwards_all(mocker):
         modal_synth=modal_synth,
         noise_synth=noise_synth,
         transient_synth=transient_synth,
+        transient_takes_noise=True,
     )
 
     y = model(x, p)
 
     encoder_spy.assert_called_once_with(x)
 
-    modal_encoder_spy.assert_called_once_with(p, expected_encoder_output)
+    modal_encoder_spy.assert_called_once_with(expected_encoder_output, p)
     noise_encoder_spy.assert_called_once_with(expected_encoder_output)
     transient_encoder_spy.assert_called_once_with(expected_encoder_output)
 
-    modal_spy.assert_called_once_with(expected_modal_encoder_output, x.size(-1))
-    noise_spy.assert_called_once_with(expected_noise_encoder_output, x.size(-1))
+    modal_spy.assert_called_once_with(expected_modal_encoder_output[0], x.size(-1))
+    noise_spy.assert_called_once_with(expected_noise_encoder_output[0], x.size(-1))
 
     transient_input = expected_modal_output + rearrange(
         expected_noise_output, "b t -> b () t"
     )
     torch.testing.assert_close(transient_spy.call_args_list[0][0][0], transient_input)
     torch.testing.assert_close(
-        transient_spy.call_args_list[0][0][1], expected_transient_encoder_output
+        transient_spy.call_args_list[0][0][1], expected_transient_encoder_output[0]
     )
 
     assert torch.all(y == expected_transient_output)

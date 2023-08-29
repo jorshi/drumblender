@@ -1,3 +1,0 @@
-class_path: torch.optim.SGD
-init_args:
-  lr: 0.001

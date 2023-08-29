@@ -1,0 +1,3 @@
+./scripts/reconstruction_metrics.sh all_parallel && ./scripts/reconstruction_metrics.sh noise_parallel_transient_params && ./scripts/reconstruction_metrics.sh noise_params && ./scripts/reconstruction_metrics.sh noise_transient_params && ./scripts/reconstruction_metrics.sh transient_params
+
+./scripts/reconstruction_metrics_inst.sh all_parallel && ./scripts/reconstruction_metrics_inst.sh noise_parallel_transient_params && ./scripts/reconstruction_metrics_inst.sh noise_params && ./scripts/reconstruction_metrics_inst.sh noise_transient_params && ./scripts/reconstruction_metrics_inst.sh transient_params

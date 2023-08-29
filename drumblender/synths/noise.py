@@ -88,7 +88,7 @@ class NoiseGenerator(nn.Module):
         noise_unfolded = noise_unfolded * window
 
         # Compute final sample size
-        n = (noise_unfolded.size()[1] - 1) * self.hop_size
+        n = (noise_unfolded.size()[1] - 1) * self.hop_size + self.window_size
 
         # Stitch the windows back together.
         # Expects tensors in format [batch, C*kernel_size, L ].
@@ -98,8 +98,7 @@ class NoiseGenerator(nn.Module):
             noise_unfolded,
             output_size=(1, n),
             kernel_size=(1, self.window_size),
-            padding=(0, self.padding),
-            stride=self.hop_size,
+            stride=(1, self.hop_size),
         )
         noise = rearrange(noise, "b 1 1 n -> b n")
         return noise
