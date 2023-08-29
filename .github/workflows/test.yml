@@ -14,11 +14,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.7", "3.6", "3.9", 3.10"]
+        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10"]
     name: Python ${{ matrix.python-version }} unit tests
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.10
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
