@@ -27,7 +27,9 @@ Requires:
 ```
 
 ## Compile Results
+After running all the reconstruction evaluation scripts, results will be saved in a series of csv files in a logs directory. To compile these results into Latex tables used in the paper, these scripts can be used:
+
 ```bash
-python scripts/compile_results.py logs acoustic
-python scripts/compile_results.py logs electronic
+python scripts/compile_results.py logs all
+python scripts/compile_results.py logs instrument
 ```
