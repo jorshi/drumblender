@@ -44,7 +44,9 @@ We used a private dataset of commenrcially recorded and produced one-shot acoust
 
 To download a pre-processed version of that dataset:
 ```bash
-drumblender-dataset cfg/data/freesound.yaml
+wget https://pub-814e66019388451395cf43c0b6f10300.r2.dev/drumblender-freesound-v0.tar.gz
+mkdir -p dataset/freesound
+tar -zxf drumblender-freesound-v0.tar.gz -C dataset/freesound
 ```
 
 
