@@ -1,19 +1,52 @@
-# Drum Blender
+<div align="center">
+
+# Differentiable Modelling of Percussive Audio with Transient and Spectral Synthesis
+
+
+[![Demo](https://img.shields.io/badge/Web-Audio_Examples-blue)](https://jordieshier.com/projects/differentiable_transient_synthesis/)
+<!-- [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](TBD) -->
+<!-- [![arXiv](https://img.shields.io/badge/arXiv-2207.08759-b31b1b.svg)](TBD) -->
+
+<!-- <img width="700px" src="docs/new-generic-style-transfer-headline.svg"> -->
+
+[Jordie Shier](https://jordieshier.com)<sup>1</sup>, [Franco Caspe](https://fcaspe.github.io/)<sup>1</sup>, Andrew Robertson<sup>2</sup>,<br> [Mark Sandler](http://eecs.qmul.ac.uk/people/profiles/sandlermark.html)<sup>1</sup>, [Charalampos Saitis](http://eecs.qmul.ac.uk/people/profiles/saitischaralampos.html)<sup>1</sup>, and [Andrew McPherson](https://www.imperial.ac.uk/people/andrew.mcpherson)<sup>3</sup>
+
+<sup>1</sup> Centre for Digital Music, Queen Mary University of London<br>
+<sup>2</sup> Ableton AG <br>
+<sup>3</sup> Dyson School of Design Engineering, Imperial College London <br>
+
+</div>
+
+## Abstract
+Differentiable digital signal processing (DDSP) techniques, including methods for audio synthesis, have gained attention in recent years and lend themselves to interpretability in the parameter space. However, current differentiable synthesis methods have not explicitly sought to model the transient portion of signals, which is important for percussive sounds. In this work, we present a unified synthesis framework aiming to address transient generation and percussive synthesis within a DDSP framework. To this end, we propose a model for percussive synthesis that builds on sinusoidal modeling synthesis and incorporates a modulated temporal convolutional network for transient generation. We use a modified sinusoidal peak picking algorithm to generate time-varying non-harmonic sinusoids and pair it with differentiable noise and transient encoders that are jointly trained to reconstruct drumset sounds. We compute a set of reconstruction metrics using a large dataset of acoustic and electronic percussion samples that show that our method leads to improved onset signal reconstruction for membranophone percussion instruments.
 
 ## Install
-Requires Python version 3.9 or greater
-
-To install with development dependencies:
+Clone the repo and then install the `drumblender` package. Requires Python version 3.9 or greater.
 
 ```bash
-$ pip install -e ".[dev]"
+pip install --upgrade pip
+pip install -e ".[modal]"
 ```
 
-Install pre-commit hooks if developing and contributing:
-
+If you don't need to run modal extraction on audio, for example, if using a pre-processed dataset for training. You can exclude the optional modal requirements. The difference is that `modal` includes `nn-audio` which depends on an older version of `numpy`.
 ```bash
-$ pre-commit install
+pip install -e .
 ```
+
+### Pre-trained Models
+A set of pre-trained models are available in a submodule, to download:
+```bash
+git submodule update --init --recursive
+```
+
+### Dataset
+We used a private dataset of commenrcially recorded and produced one-shot acoustic and electronic drum samples. We can't share those, but for example we've included a data config using [Freesound One-Shot Percussive Sounds](https://zenodo.org/record/3665275).
+
+To download a pre-processed version of that dataset:
+```bash
+drumblender-dataset cfg/data/freesound.yaml
+```
+
 
 ## Run
 
@@ -72,3 +105,16 @@ Experiments were run using
 
 The exact Python packages in the environment during model training are in
 `train-packages.txt`.
+
+## Developing
+To install dev requirements and pre-commit hooks:
+
+```bash
+$ pip install -e ".[dev]"
+```
+
+Install pre-commit hooks if developing and contributing:
+
+```bash
+$ pre-commit install
+```
