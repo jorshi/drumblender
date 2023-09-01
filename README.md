@@ -39,8 +39,12 @@ A set of pre-trained models are available in a submodule, to download:
 git submodule update --init --recursive
 ```
 
-### Dataset
-We used a private dataset of commenrcially recorded and produced one-shot acoustic and electronic drum samples. We can't share those, but for example we've included a data config using [Freesound One-Shot Percussive Sounds](https://zenodo.org/record/3665275).
+## Inference
+Show an example of running model inference on a single file.
+- Perhaps, also include as an example blending of the different elements using different samples.
+
+## Dataset
+We used a private dataset of commercially recorded and produced one-shot acoustic and electronic drum samples. We unfortunately can't share those, but we've included a config using [Freesound One-Shot Percussive Sounds](https://zenodo.org/record/3665275) to provide an example of dataset configuration and training.
 
 To download a pre-processed version of that dataset:
 ```bash
@@ -49,6 +53,7 @@ mkdir -p dataset/freesound
 tar -zxf drumblender-freesound-v0.tar.gz -C dataset/freesound
 ```
 
+## Training
 
 ## Run
 
