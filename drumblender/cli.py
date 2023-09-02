@@ -14,6 +14,7 @@ from tqdm import tqdm
 import drumblender.utils.data as data_utils
 from drumblender.callbacks import SaveConfigCallbackWanb
 from drumblender.data import AudioDataModule
+from drumblender.tasks import DrumBlender
 
 
 def run_cli():
@@ -126,3 +127,36 @@ def verify_dataset(datamodule: LightningDataModule):
 
         for i in tqdm(range(len(dataset))):
             _ = dataset[i]
+
+
+def inference():
+    """
+    Given an input audio, compute reconstruction.
+
+    Optionally, can pass in different audio files for sinusoidal, noise, and transient
+    embeddings.
+    """
+    load_dotenv()
+    parser = ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+
+    parser.add_argument(
+        "config",
+        type=str,
+        help="Path to a config file with arguments.",
+    )
+    parser.add_argument(
+        "checkpoint",
+        type=str,
+        help="Path to a checkpoint file.",
+    )
+
+    args = parser.parse_args(sys.argv[1:])
+
+    # Load trained model
+    config_parser = ArgumentParser()
+    config_parser.add_subclass_arguments(DrumBlender, "model", fail_untyped=False)
+
+    config = config_parser.parse_path(args.config)
+    print(config)
