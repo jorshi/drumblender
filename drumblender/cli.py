@@ -2,10 +2,14 @@
 drumblender command line interface entrypoint.
 """
 import argparse
+import inspect
 import sys
 
+import torch
+import torchaudio
 import yaml
 from dotenv import load_dotenv
+from einops import rearrange
 from jsonargparse import ArgumentParser
 from pytorch_lightning import LightningDataModule
 from pytorch_lightning.cli import LightningCLI
@@ -15,6 +19,7 @@ import drumblender.utils.data as data_utils
 from drumblender.callbacks import SaveConfigCallbackWanb
 from drumblender.data import AudioDataModule
 from drumblender.tasks import DrumBlender
+from drumblender.utils.modal_analysis import CQTModalAnalysis
 
 
 def run_cli():
@@ -151,12 +156,72 @@ def inference():
         type=str,
         help="Path to a checkpoint file.",
     )
+    parser.add_argument("audio", type=str, help="Path to input audio file")
+    parser.add_argument("output", type=str, help="Path to save audio to")
 
     args = parser.parse_args(sys.argv[1:])
 
     # Load trained model
     config_parser = ArgumentParser()
     config_parser.add_subclass_arguments(DrumBlender, "model", fail_untyped=False)
+    config_parser.add_argument("--trainer", type=dict, default={})
+    config_parser.add_argument("--seed_everything", type=int)
+    config_parser.add_argument("--ckpt_path", type=str)
+    config_parser.add_argument("--optimizer", type=dict)
+    config_parser.add_argument("--lr_scheduler", type=dict)
+    config_parser.add_argument("--data", type=dict)
 
+    # Initialize model from configuration
     config = config_parser.parse_path(args.config)
-    print(config)
+    init = config_parser.instantiate_classes(config)
+
+    # Load the checkpoint
+    print(f"Loading checkpoint from {args.checkpoint}...")
+
+    # Get the constructor arguments for the DrumBlender task and create a dictionary of
+    # keyword arguments to instantiate a new DrumBlender object from checkpoint
+    init_args = inspect.getfullargspec(DrumBlender.__init__).args
+    model_dict = {
+        attr: getattr(init.model, attr)
+        for attr in init_args
+        if attr != "self" and hasattr(init.model, attr)
+    }
+
+    # Load new model from checkpoint file
+    model = init.model.load_from_checkpoint(args.checkpoint, **model_dict)
+
+    audio, input_sr = torchaudio.load(args.audio)
+
+    # Convert to mono (just selecting the first channel)
+    audio = audio[:1]
+
+    # Resample the waveform to the desired sample rate
+    data_config = config.data["init_args"]
+    sample_rate = data_config["sample_rate"]
+    if input_sr != sample_rate:
+        audio = torchaudio.transforms.Resample(
+            orig_freq=input_sr, new_freq=sample_rate
+        )(audio)
+
+    # Pad (CQT has a minimum length)
+    if audio.shape[1] < data_config["num_samples"]:
+        num_pad = data_config["num_samples"] - audio.shape[1]
+        audio = torch.nn.functional.pad(audio, (0, num_pad))
+
+    # Perform modal analysis on input file
+    cqt_args = inspect.getfullargspec(CQTModalAnalysis.__init__).args
+    cqt_kwargs = {key: data_config[key] for key in cqt_args if key in data_config}
+
+    modal = CQTModalAnalysis(**cqt_kwargs)
+    modal_freqs, modal_amps, modal_phases = modal(audio)
+
+    # Frequencies are returned in Hz, convert to angular
+    modal_freqs = 2 * torch.pi * modal_freqs / sample_rate
+
+    modal_tensor = torch.stack([modal_freqs, modal_amps, modal_phases])
+    modal_tensor = rearrange(modal_tensor, "s 1 m f -> 1 s m f")
+
+    # Run the model!
+    y_hat = model(audio.unsqueeze(0), modal_tensor)
+
+    torchaudio.save(args.output, y_hat.squeeze(0), sample_rate)
