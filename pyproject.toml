@@ -27,6 +27,7 @@ dependencies = [
 [project.scripts]
 drumblender = "drumblender.cli:main"
 drumblender-dataset = "drumblender.cli:dataset"
+drumblender-synth = "drumblender.cli:inference"
 
 [project.optional-dependencies]
 dev = ["black", "flake8", "pytest", "pytest-mock", "pyfakefs", "pre-commit", "pytest-cov"]
