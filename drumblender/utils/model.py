@@ -70,3 +70,13 @@ def load_datamodule(config: str):
             ).datamodule
 
     return datamodule
+
+
+def load_config_yaml(config: str):
+    """
+    Load a config file
+    """
+    with open(config, "r") as f:
+        config = yaml.safe_load(f)
+
+    return config

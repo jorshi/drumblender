@@ -16,9 +16,9 @@ from pytorch_lightning.cli import LightningCLI
 from tqdm import tqdm
 
 import drumblender.utils.data as data_utils
+import drumblender.utils.model as model_utils
 from drumblender.callbacks import SaveConfigCallbackWanb
 from drumblender.data import AudioDataModule
-from drumblender.tasks import DrumBlender
 from drumblender.utils.modal_analysis import CQTModalAnalysis
 
 
@@ -161,43 +161,16 @@ def inference():
 
     args = parser.parse_args(sys.argv[1:])
 
-    # Load trained model
-    config_parser = ArgumentParser()
-    config_parser.add_subclass_arguments(DrumBlender, "model", fail_untyped=False)
-    config_parser.add_argument("--trainer", type=dict, default={})
-    config_parser.add_argument("--seed_everything", type=int)
-    config_parser.add_argument("--ckpt_path", type=str)
-    config_parser.add_argument("--optimizer", type=dict)
-    config_parser.add_argument("--lr_scheduler", type=dict)
-    config_parser.add_argument("--data", type=dict)
-
-    # Initialize model from configuration
-    config = config_parser.parse_path(args.config)
-    init = config_parser.instantiate_classes(config)
-
-    # Load the checkpoint
-    print(f"Loading checkpoint from {args.checkpoint}...")
-
-    # Get the constructor arguments for the DrumBlender task and create a dictionary of
-    # keyword arguments to instantiate a new DrumBlender object from checkpoint
-    init_args = inspect.getfullargspec(DrumBlender.__init__).args
-    model_dict = {
-        attr: getattr(init.model, attr)
-        for attr in init_args
-        if attr != "self" and hasattr(init.model, attr)
-    }
-
-    # Load new model from checkpoint file
-    model = init.model.load_from_checkpoint(args.checkpoint, **model_dict)
+    model, _ = model_utils.load_model(args.config, args.checkpoint)
 
     audio, input_sr = torchaudio.load(args.audio)
 
     # Convert to mono (just selecting the first channel)
     audio = audio[:1]
 
-    # Resample the waveform to the desired sample rate
-    data_config = config.data["init_args"]
+    data_config = model_utils.load_config_yaml(args.config)["data"]["init_args"]
     sample_rate = data_config["sample_rate"]
+
     if input_sr != sample_rate:
         audio = torchaudio.transforms.Resample(
             orig_freq=input_sr, new_freq=sample_rate
