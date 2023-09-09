@@ -145,7 +145,6 @@ def inference():
     parser = ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
-
     parser.add_argument(
         "config",
         type=str,
@@ -156,21 +155,21 @@ def inference():
         type=str,
         help="Path to a checkpoint file.",
     )
-    parser.add_argument("audio", type=str, help="Path to input audio file")
+    parser.add_argument("input", type=str, help="Path to input audio file")
     parser.add_argument("output", type=str, help="Path to save audio to")
 
     args = parser.parse_args(sys.argv[1:])
 
+    # Load the model from checkpoint
     model, _ = model_utils.load_model(args.config, args.checkpoint)
 
+    # Load audio and convert to mono (just selecting the first channel)
     audio, input_sr = torchaudio.load(args.audio)
-
-    # Convert to mono (just selecting the first channel)
     audio = audio[:1]
 
+    # Resample to the sample rate used in training
     data_config = model_utils.load_config_yaml(args.config)["data"]["init_args"]
     sample_rate = data_config["sample_rate"]
-
     if input_sr != sample_rate:
         audio = torchaudio.transforms.Resample(
             orig_freq=input_sr, new_freq=sample_rate
