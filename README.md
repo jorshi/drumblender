@@ -86,7 +86,7 @@ The `--trainer.logger` argument overrides the logging configuration in the saved
 To run this command on a CPU you can add the argument `--trainer.accelerator cpu`
 
 ## System Information
-Experiments were run using
+For Forum Acusticum 2023, experiments were run using
 
 - Python version: 3.10.10.
 - GPU: Tesla V100-PCIE-16GB
