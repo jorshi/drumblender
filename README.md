@@ -81,7 +81,7 @@ Pass `test` as an argument to `drumblender` to test a trained model. For example
 drumblender test -c models/forum-acusticum-2023/noise_parallel_transient_params.yaml --ckpt models/forum-acusticum-2023/noise_parallel_transient_params.ckpt --data cfg/data/freesound.yaml --trainer.logger CSVLogger --model.test_metrics cfg/metrics/drumblender_metrics.yaml
 ```
 
-The `--trainer.logger` argument overrides the logging configuration in the saved yaml file. `model.test_metrics` adds extra metrics used in the evaluation for the paper.
+The `--trainer.logger` argument overrides the logging configuration in the saved yaml file. `--model.test_metrics` adds extra metrics used in the evaluation for the paper.
 
 To run this command on a CPU you can add the argument `--trainer.accelerator cpu`
 
