@@ -42,7 +42,7 @@ git submodule update --init --recursive
 ## Inference
 To resynthesise an audio sample using a trained model:
 ```bash
-drumblender-synth  config checkpoint input output
+drumblender-synth config checkpoint input output
 ```
 
 For example:
@@ -61,6 +61,32 @@ tar -zxf drumblender-freesound-v0.tar.gz -C dataset/freesound
 ```
 
 ## Training
+Use the `drumblender` command to train a new model.
+
+```bash
+drumblender fit -c cfg/01_noise_params.yaml --data cfg/data/freesound.yaml
+```
+
+Training config files can be found in the directory `cfg`. The configuration files
+in the root of that directory are the configurations used to train and test the different
+model configurations presented in the Forum Acusticum paper.
+
+We used the PyTorch Lightning
+[LightningCLI](https://lightning.ai/docs/pytorch/LTS/api/pytorch_lightning.cli.LightningCLI.html?highlight=lightningcli#pytorch_lightning.cli.LightningCLI).
+
+## Testing
+Pass `test` as an argument to `drumblender` to test a trained model. For example, to test a model on the test set of the Freesound Percussive One-Shot dataset:
+
+```bash
+drumblender test -c models/forum-acusticum-2023/noise_parallel_transient_params.yaml --ckpt models/forum-acusticum-2023/noise_parallel_transient_params.ckpt --data cfg/data/freesound.yaml --trainer.logger CSVLogger --model.test_metrics cfg/metrics/drumblender_metrics.yaml
+```
+
+The `--trainer.logger` argument overrides the logging configuration in the saved yaml file. `model.test_metrics` adds extra metrics used in the evaluation for the paper.
+
+To run this command on a CPU you can add the argument `--trainer.accelerator cpu`
+
+
+
 
 ## Run
 
