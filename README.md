@@ -40,8 +40,15 @@ git submodule update --init --recursive
 ```
 
 ## Inference
-Show an example of running model inference on a single file.
-- Perhaps, also include as an example blending of the different elements using different samples.
+To resynthesise an audio sample using a trained model:
+```bash
+drumblender-synth  config checkpoint input output
+```
+
+For example:
+```bash
+drumblender-synth models/forum-acusticum-2023/noise_parallel_transient_params.yaml models/forum-acusticum-2023/noise_parallel_transient_params.ckpt audio/a_snare.wav snare_resynth.wav
+```
 
 ## Dataset
 We used a private dataset of commercially recorded and produced one-shot acoustic and electronic drum samples. We unfortunately can't share those, but we've included a config using [Freesound One-Shot Percussive Sounds](https://zenodo.org/record/3665275) to provide an example of dataset configuration and training.
