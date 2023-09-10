@@ -164,7 +164,7 @@ def inference():
     model, _ = model_utils.load_model(args.config, args.checkpoint)
 
     # Load audio and convert to mono (just selecting the first channel)
-    audio, input_sr = torchaudio.load(args.audio)
+    audio, input_sr = torchaudio.load(args.input)
     audio = audio[:1]
 
     # Resample to the sample rate used in training
