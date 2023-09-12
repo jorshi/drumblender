@@ -4,10 +4,7 @@
 
 
 [![Demo](https://img.shields.io/badge/Web-Audio_Examples-blue)](https://jordieshier.com/projects/differentiable_transient_synthesis/)
-<!-- [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](TBD) -->
-<!-- [![arXiv](https://img.shields.io/badge/arXiv-2207.08759-b31b1b.svg)](TBD) -->
-
-<!-- <img width="700px" src="docs/new-generic-style-transfer-headline.svg"> -->
+[![Paper](https://img.shields.io/badge/PDF-Paper-green)](https://jordieshier.com/assets/pdf/shier2023differentiable_paper.pdf)
 
 [Jordie Shier](https://jordieshier.com)<sup>1</sup>, [Franco Caspe](https://fcaspe.github.io/)<sup>1</sup>, Andrew Robertson<sup>2</sup>,<br> [Mark Sandler](http://eecs.qmul.ac.uk/people/profiles/sandlermark.html)<sup>1</sup>, [Charalampos Saitis](http://eecs.qmul.ac.uk/people/profiles/saitischaralampos.html)<sup>1</sup>, and [Andrew McPherson](https://www.imperial.ac.uk/people/andrew.mcpherson)<sup>3</sup>
 
