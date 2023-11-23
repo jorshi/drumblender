@@ -118,6 +118,7 @@ class _DilatedResidualBlock(nn.Module):
     def forward(self, x: torch.Tensor, film_embedding: Optional[torch.Tensor] = None):
         activations = self.net(x)
         if self.film is not None:
+            assert isinstance(film_embedding, torch.Tensor)
             activations = self.film(activations, film_embedding)
         y = self.activation(activations)
 
