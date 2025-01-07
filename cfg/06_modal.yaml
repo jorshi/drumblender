@@ -6,7 +6,7 @@ model:
     modal_autoencoder:
       class_path: drumblender.models.encoders.ModalAmpParameters
       init_args:
-        num_modes: 64
+        num_modes: 8
         ones: true
     transient_synth: null
     transient_autoencoder: null

@@ -265,7 +265,7 @@ class AudioWithParametersDataset(AudioDataset):
         # Pad with zeros if the number of modes is less than expected
         if (
             self.expected_num_modes is not None
-            and feature.shape[1] != self.expected_num_modes
+            and feature.shape[1] < self.expected_num_modes
         ):
             null_features = torch.zeros(
                 (
@@ -275,5 +275,10 @@ class AudioWithParametersDataset(AudioDataset):
                 )
             )
             feature = torch.cat((feature, null_features), dim=1)
+        elif (
+            self.expected_num_modes is not None
+            and feature.shape[1] > self.expected_num_modes
+        ):
+            feature = feature[:, : self.expected_num_modes, :]
 
         return waveform_a, feature
